@@ -85,8 +85,8 @@ jobs:
                   applicationId 'com.weatherapp.app'
                   minSdk 24
                   targetSdk 34
-                  versionCode 38
-                  versionName '4.6.1'
+                  versionCode 39
+                  versionName '4.6.2'
               }
           }
           EOF
