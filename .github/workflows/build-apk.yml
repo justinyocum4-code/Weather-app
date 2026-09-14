@@ -1,1 +1,268 @@
 
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Android SDK packages
+        run: |
+          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          if ! command -v sdkmanager >/dev/null 2>&1; then
+            export PATH="$PATH:$ANDROID_HOME/cmdline-tools/latest/bin"
+          fi
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Scaffold Android project
+        run: |
+          echo "=== Files in repo ==="
+          ls -la
+          HTML_FILE=./index.html
+          if [ ! -f "$HTML_FILE" ]; then
+            echo "ERROR: index.html was not found in the repository root."
+            echo "Upload index.html to the repository root first (Add file > Upload files), then re-run this workflow."
+            exit 1
+          fi
+          echo "Using $HTML_FILE as the app page."
+          if ! grep -q 'id="weather-app"' "$HTML_FILE"; then
+            echo "ERROR: $HTML_FILE is not the weather app file (weather-app marker missing)."
+            echo "Upload the weather app index.html to the repository root, then re-run this workflow."
+            exit 1
+          fi
+
+          mkdir -p app/src/main/java/com/workoutapp/app app/src/main/assets/www
+
+          cp "$HTML_FILE" app/src/main/assets/www/index.html
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "WeatherApp"
+          include(":app")
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.5.2' apply false
+          }
+          EOF
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+          android {
+              namespace 'com.weatherapp.app'
+              compileSdk 34
+              defaultConfig {
+                  applicationId 'com.weatherapp.app'
+                  minSdk 24
+                  targetSdk 34
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <application
+                  android:label="Weather"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  <activity
+                      android:name="com.weatherapp.app.MainActivity"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/java/com/workoutapp/app/MainActivity.java <<'EOF'
+          package com.weatherapp.app;
+
+          import android.app.Activity;
+          import android.Manifest;
+          import android.content.pm.PackageManager;
+          import android.os.Bundle;
+          import android.speech.tts.TextToSpeech;
+          import android.webkit.GeolocationPermissions;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import java.util.Locale;
+
+          public class MainActivity extends Activity {
+              private WebView webView;
+              private static final int LOCATION_REQUEST = 1002;
+              private TextToSpeech tts;
+              private boolean ttsReady = false;
+              private String pendingTts = null;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  webView = new WebView(this);
+                  webView.getSettings().setJavaScriptEnabled(true);
+                  webView.getSettings().setDomStorageEnabled(true);
+                  webView.getSettings().setAllowFileAccess(true);
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.getSettings().setGeolocationEnabled(true);
+                  webView.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                          callback.invoke(origin, true, false);
+                      }
+                  });
+                  if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                      requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                  }
+                  webView.addJavascriptInterface(new Object() {
+                      @JavascriptInterface
+                      public void setItem(String key, String value) {
+                          try {
+                              getSharedPreferences("weather_app", MODE_PRIVATE).edit().putString(key, value).commit();
+                          } catch (Exception ignored) {}
+                      }
+                      @JavascriptInterface
+                      public String getItem(String key) {
+                          try {
+                              return getSharedPreferences("weather_app", MODE_PRIVATE).getString(key, null);
+                          } catch (Exception e) {
+                              return null;
+                          }
+                      }
+                      @JavascriptInterface
+                      public void removeItem(String key) {
+                          try {
+                              getSharedPreferences("weather_app", MODE_PRIVATE).edit().remove(key).commit();
+                          } catch (Exception ignored) {}
+                      }
+                  }, "LynxosStore");
+                  tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+                      @Override
+                      public void onInit(int status) {
+                          if (status == TextToSpeech.SUCCESS) {
+                              try {
+                                  int result = tts.setLanguage(Locale.US);
+                                  ttsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                              } catch (Exception e) {
+                                  ttsReady = false;
+                              }
+                              if (ttsReady && pendingTts != null) {
+                                  String text = pendingTts;
+                                  pendingTts = null;
+                                  try {
+                                      tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "weather-reader");
+                                  } catch (Exception ignored) {}
+                              }
+                          }
+                      }
+                  });
+                  webView.addJavascriptInterface(new Object() {
+                      @JavascriptInterface
+                      public void speak(String text) {
+                          if (text == null) return;
+                          if (ttsReady && tts != null) {
+                              try {
+                                  tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "weather-reader");
+                              } catch (Exception ignored) {}
+                          } else {
+                              pendingTts = text;
+                          }
+                      }
+                      @JavascriptInterface
+                      public void stop() {
+                          pendingTts = null;
+                          try {
+                              if (tts != null) tts.stop();
+                          } catch (Exception ignored) {}
+                      }
+                  }, "LynxosTts");
+                  if (savedInstanceState != null) {
+                      webView.restoreState(savedInstanceState);
+                  } else {
+                      webView.loadUrl("file:///android_asset/www/index.html");
+                  }
+                  setContentView(webView);
+              }
+
+
+              @Override
+              protected void onDestroy() {
+                  if (tts != null) {
+                      try {
+                          tts.stop();
+                          tts.shutdown();
+                      } catch (Exception ignored) {}
+                      tts = null;
+                  }
+                  super.onDestroy();
+              }
+
+              @Override
+              protected void onSaveInstanceState(Bundle outState) {
+                  super.onSaveInstanceState(outState);
+                  if (webView != null) {
+                      webView.saveState(outState);
+                  }
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+          }
+          EOF
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.7
+
+      - name: Build debug APK
+        run: gradle :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: weather-app-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
