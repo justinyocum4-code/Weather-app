@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Weather</title>
+<style>
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0b1a2e;
+    color: #ffffff;
+    line-height: 1.5;
+  }
+  #weather-app { max-width: 640px; margin: 0 auto; padding: 16px 16px 48px; }
+  header.app-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  header.app-header h1 { font-size: 1.6rem; margin: 0; }
+  #location-name { font-size: 1rem; color: #bcd3ea; margin: 0 0 12px; }
+  .card {
+    background: #132840;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid #23405f;
+  }
+  .card h2 { font-size: 1.15rem; margin: 0 0 12px; color: #ffd75e; }
+  .temp-big { font-size: 4rem; font-weight: 700; line-height: 1; margin: 0; }
+  .condition { font-size: 1.3rem; margin: 4px 0 12px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; }
+  .detail { font-size: 1rem; }
+  .detail .label { color: #9db8d2; display: block; font-size: 0.85rem; }
+  .detail .value { font-size: 1.15rem; font-weight: 600; }
+  button {
+    font-family: inherit;
+    font-size: 1.05rem;
+    min-height: 52px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: #2f7fe0;
+    color: #fff;
+    width: 100%;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .btn-primary:active { background: #2568b8; }
+  .btn-small {
+    background: #1d3556;
+    color: #fff;
+    padding: 10px 16px;
+    min-height: 48px;
+  }
+  #alerts .alert-banner {
+    background: #5c1a1a;
+    border: 2px solid #ff5a5a;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  #alerts .alert-banner h2 { color: #ffb3b3; margin: 0 0 8px; font-size: 1.15rem; }
+  #alerts .alert-item { margin-bottom: 10px; }
+  #alerts .alert-item:last-child { margin-bottom: 0; }
+  #alerts .alert-event { font-weight: 700; font-size: 1.05rem; }
+  #alerts .alert-desc { font-size: 0.95rem; color: #f0d0d0; }
+  #hourly-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+  .hour-item {
+    flex: 0 0 auto;
+    min-width: 76px;
+    background: #0f2238;
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    border: 1px solid #23405f;
+  }
+  .hour-item .h-time { font-size: 0.85rem; color: #9db8d2; }
+  .hour-item .h-temp { font-size: 1.2rem; font-weight: 700; margin: 4px 0; }
+  .hour-item .h-rain { font-size: 0.85rem; color: #7ec8ff; }
+  .day-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 4px;
+    border-bottom: 1px solid #23405f;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-name { font-weight: 700; min-width: 88px; }
+  .day-cond { flex: 1; color: #cfe0f2; font-size: 0.95rem; }
+  .day-temps { text-align: right; white-space: nowrap; }
+  .day-high { font-weight: 700; }
+  .day-low { color: #9db8d2; margin-left: 8px; }
+  .day-rain { color: #7ec8ff; font-size: 0.85rem; display: block; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid #23405f; }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-row .setting-label { font-size: 1.05rem; }
+  .setting-row .setting-desc { font-size: 0.85rem; color: #9db8d2; }
+  .seg { display: flex; gap: 8px; }
+  .seg button { padding: 10px 18px; min-height: 48px; background: #0f2238; color: #fff; border: 1px solid #23405f; }
+  .seg button[aria-pressed="true"] { background: #2f7fe0; border-color: #2f7fe0; font-weight: 700; }
+  #status-line { color: #9db8d2; font-size: 0.9rem; margin-bottom: 16px; }
+  #app-info .info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 1rem; }
+  #app-info .info-row .k { color: #9db8d2; }
+  footer { color: #7d97b3; font-size: 0.85rem; text-align: center; margin-top: 8px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+</style>
+</head>
+<body>
+<div id="weather-app">
+  <header class="app-header">
+    <h1>Weather</h1>
+    <button id="refresh-btn" class="btn-small" aria-label="Refresh weather now">Refresh</button>
+  </header>
+  <p id="location-name" role="status">Finding your location…</p>
+  <p id="status-line" role="status"></p>
+
+  <div id="alerts" aria-live="polite"></div>
+
+  <section class="card" id="current-card" aria-labelledby="current-heading">
+    <h2 id="current-heading">Right now</h2>
+    <p class="temp-big" id="current-temp">--</p>
+    <p class="condition" id="current-condition">Loading…</p>
+    <div class="detail-grid">
+      <div class="detail"><span class="label">Feels like</span><span class="value" id="d-feels">--</span></div>
+      <div class="detail"><span class="label">Humidity</span><span class="value" id="d-humidity">--</span></div>
+      <div class="detail"><span class="label">Wind</span><span class="value" id="d-wind">--</span></div>
+      <div class="detail"><span class="label">Pressure</span><span class="value" id="d-pressure">--</span></div>
+      <div class="detail"><span class="label">UV index</span><span class="value" id="d-uv">--</span></div>
+      <div class="detail"><span class="label">Air quality</span><span class="value" id="d-aqi">--</span></div>
+      <div class="detail"><span class="label">Sunrise</span><span class="value" id="d-sunrise">--</span></div>
+      <div class="detail"><span class="label">Sunset</span><span class="value" id="d-sunset">--</span></div>
+    </div>
+  </section>
+
+  <button id="speak-btn" class="btn-primary">🔊 Read forecast aloud</button>
+
+  <section class="card" aria-labelledby="hourly-heading">
+    <h2 id="hourly-heading">Next 24 hours</h2>
+    <div id="hourly-list" role="list"></div>
+  </section>
+
+  <section class="card" aria-labelledby="daily-heading">
+    <h2 id="daily-heading">7-day forecast</h2>
+    <div id="daily-list"></div>
+  </section>
+
+  <section class="card" aria-labelledby="national-heading">
+    <h2 id="national-heading">National severe weather</h2>
+    <p class="muted">Tornado, severe thunderstorm, flood, hurricane, winter storm, heat, fire weather, and high wind alerts across the US.</p>
+    <div id="national-list" role="list"></div>
+  </section>
+
+  <section class="card" aria-labelledby="settings-heading">
+    <h2 id="settings-heading">Settings</h2>
+    <div class="setting-row">
+      <div><div class="setting-label">Units</div><div class="setting-desc">Fahrenheit or Celsius</div></div>
+      <div class="seg" role="group" aria-label="Temperature units">
+        <button id="unit-f" aria-pressed="true">°F</button>
+        <button id="unit-c" aria-pressed="false">°C</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <div><div class="setting-label">Location</div><div class="setting-desc">Use GPS or Alvarado, TX</div></div>
+      <div class="seg" role="group" aria-label="Location mode">
+        <button id="loc-auto" aria-pressed="true">Auto</button>
+        <button id="loc-home" aria-pressed="false">Alvarado</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="card" id="app-info" aria-labelledby="appinfo-heading">
+    <h2 id="appinfo-heading">App info</h2>
+    <div class="info-row"><span class="k">App version</span><span id="info-version">--</span></div>
+    <div class="info-row"><span class="k">Storage</span><span id="info-storage">--</span></div>
+    <div class="info-row"><span class="k">Voice</span><span id="info-voice">--</span></div>
+  </section>
+
+  <footer>Weather data: Open-Meteo · Alerts: National Weather Service</footer>
+</div>
+<script>
+"use strict";
+/* ================= Weather v1.0 ================= */
+const WEATHER_APP_VERSION = "1.3";
+const DEFAULT_LAT = 32.4046;
+const DEFAULT_LON = -97.2089;
+const DEFAULT_NAME = "Alvarado, TX";
+const STORE_KEY = "weatherApp.v1";
+
+/* ---------- Native bridges (Android) with web fallbacks ---------- */
+const hasNativeStore = (typeof window.LynxosStore !== "undefined") && window.LynxosStore;
+const appStorage = {
+  getItem(k) {
+    try {
+      if (hasNativeStore) { const v = window.LynxosStore.getItem(k); return (v === null || v === undefined) ? null : String(v); }
+      return window.localStorage.getItem(k);
+    } catch (e) { return null; }
+  },
+  setItem(k, v) {
+    try {
+      if (hasNativeStore) window.LynxosStore.setItem(k, String(v));
+      else window.localStorage.setItem(k, String(v));
+    } catch (e) {}
+  }
+};
+const hasNativeTts = (typeof window.LynxosTts !== "undefined") && window.LynxosTts;
+let ttsWanted = true;
+function ttsAvailable() {
+  if (!ttsWanted) return false;
+  if (hasNativeTts) return true;
+  try { return ("speechSynthesis" in window) && (typeof window.speechSynthesis.speak === "function"); } catch (e) { return false; }
+}
+function speak(text) {
+  if (!ttsWanted || !text) return;
+  try {
+    if (hasNativeTts) { window.LynxosTts.speak(String(text)); return; }
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(String(text));
+      u.rate = 1.0;
+      window.speechSynthesis.speak(u);
+    }
+  } catch (e) {}
+}
+function stopSpeaking() {
+  try {
+    if (hasNativeTts) window.LynxosTts.cancel();
+    else if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  } catch (e) {}
+}
+
+/* ---------- Settings ---------- */
+function loadSettings() {
+  let s = { units: "F", locMode: "auto" };
+  try {
+    const raw = appStorage.getItem(STORE_KEY + ".settings");
+    if (raw) s = Object.assign(s, JSON.parse(raw));
+  } catch (e) {}
+  return s;
+}
+function saveSettings(s) {
+  try { appStorage.setItem(STORE_KEY + ".settings", JSON.stringify(s)); } catch (e) {}
+}
+let settings = loadSettings();
+
+/* ---------- Weather code descriptions (WMO) ---------- */
+function describeCode(code) {
+  if (code === 0) return "Clear sky";
+  if (code === 1) return "Mainly clear";
+  if (code === 2) return "Partly cloudy";
+  if (code === 3) return "Overcast";
+  if (code === 45 || code === 48) return "Foggy";
+  if (code >= 51 && code <= 57) return "Drizzle";
+  if (code >= 61 && code <= 67) return "Rain";
+  if (code >= 71 && code <= 77) return "Snow";
+  if (code >= 80 && code <= 82) return "Rain showers";
+  if (code === 85 || code === 86) return "Snow showers";
+  if (code === 95) return "Thunderstorm";
+  if (code === 96 || code === 99) return "Thunderstorm with hail";
+  return "Unknown";
+}
+function compass(deg) {
+  const dirs = ["N","NE","E","SE","S","SW","W","NW"];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+/* ---------- Unit conversion (API returns imperial) ---------- */
+function fmtTemp(f) {
+  if (f === null || f === undefined) return "--";
+  if (settings.units === "C") return Math.round((f - 32) * 5 / 9) + "°C";
+  return Math.round(f) + "°F";
+}
+function fmtWind(mph) {
+  if (mph === null || mph === undefined) return "--";
+  if (settings.units === "C") return Math.round(mph * 1.609) + " kph";
+  return Math.round(mph) + " mph";
+}
+
+/* ---------- API ---------- */
+async function fetchJson(url) {
+  const res = await fetch(url, { headers: { "Accept": "application/json" } });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  return res.json();
+}
+function openMeteoUrl(lat, lon) {
+  const p = new URLSearchParams({
+    latitude: lat, longitude: lon,
+    current: "temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,pressure_msl,uv_index",
+    hourly: "temperature_2m,precipitation_probability,weather_code",
+    daily: "weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset",
+    temperature_unit: "fahrenheit", wind_speed_unit: "mph",
+    timezone: "auto", forecast_days: "7"
+  });
+  return "https://api.open-meteo.com/v1/forecast?" + p.toString();
+}
+function airQualityUrl(lat, lon) {
+  const p = new URLSearchParams({
+    latitude: lat, longitude: lon,
+    current: "us_aqi,pm2_5",
+    timezone: "auto"
+  });
+  return "https://air-quality-api.open-meteo.com/v1/air-quality?" + p.toString();
+}
+async function fetchAirQuality(lat, lon) {
+  try {
+    const data = await fetchJson(airQualityUrl(lat, lon));
+    return (data && data.current) ? data.current : null;
+  } catch (e) { return null; }
+}
+async function fetchNwsAlerts(lat, lon) {
+  try {
+    const data = await fetchJson("https://api.weather.gov/alerts/active?point=" + lat.toFixed(4) + "," + lon.toFixed(4));
+    return (data && data.features) ? data.features.slice(0, 5) : [];
+  } catch (e) { return []; }
+}
+
+const NATIONAL_ALERT_TYPES = new Set([
+  "Tornado Warning", "Tornado Watch",
+  "Severe Thunderstorm Warning", "Severe Thunderstorm Watch",
+  "Flash Flood Warning", "Flash Flood Watch", "Flood Warning", "Flood Watch",
+  "Hurricane Warning", "Hurricane Watch", "Tropical Storm Warning", "Tropical Storm Watch",
+  "Storm Surge Warning", "Storm Surge Watch",
+  "Red Flag Warning", "Fire Weather Watch",
+  "Winter Storm Warning", "Winter Storm Watch", "Blizzard Warning", "Blizzard Watch",
+  "Ice Storm Warning", "Winter Weather Advisory",
+  "Extreme Heat Warning", "Heat Advisory",
+  "High Wind Warning", "High Wind Watch", "Wind Advisory",
+  "Freeze Warning", "Freeze Watch"
+]);
+
+const ALERT_SEVERITY = {
+  "Tornado Warning": 1, "Flash Flood Warning": 2, "Severe Thunderstorm Warning": 3,
+  "Tornado Watch": 4, "Hurricane Warning": 5, "Storm Surge Warning": 6,
+  "Blizzard Warning": 7, "Ice Storm Warning": 8, "Winter Storm Warning": 9,
+  "Extreme Heat Warning": 10, "High Wind Warning": 11, "Red Flag Warning": 12,
+  "Flood Warning": 13, "Tropical Storm Warning": 14
+};
+
+async function fetchNationalAlerts() {
+  try {
+    const data = await fetchJson("https://api.weather.gov/alerts/active?limit=200");
+    const features = (data && data.features) || [];
+    const filtered = features.filter(f => {
+      const ev = (f.properties || {}).event;
+      return NATIONAL_ALERT_TYPES.has(ev);
+    });
+    filtered.sort((a, b) => {
+      const sa = ALERT_SEVERITY[(a.properties || {}).event] || 99;
+      const sb = ALERT_SEVERITY[(b.properties || {}).event] || 99;
+      return sa - sb;
+    });
+    return filtered.slice(0, 25);
+  } catch (e) { return []; }
+}
+
+function alertCategory(event) {
+  if (!event) return "Other";
+  if (event.includes("Tornado")) return "Tornado";
+  if (event.includes("Severe Thunderstorm")) return "Severe Thunderstorm";
+  if (event.includes("Flood")) return "Flood";
+  if (event.includes("Hurricane") || event.includes("Tropical Storm") || event.includes("Storm Surge")) return "Hurricane and Tropical";
+  if (event.includes("Winter") || event.includes("Blizzard") || event.includes("Ice Storm") || event.includes("Freeze") || event.includes("Frost")) return "Winter";
+  if (event.includes("Heat")) return "Heat";
+  if (event.includes("Red Flag") || event.includes("Fire Weather")) return "Fire Weather";
+  if (event.includes("Wind")) return "Wind";
+  return "Other";
+}
+
+function renderNationalAlerts(alerts) {
+  const box = el("national-list");
+  box.innerHTML = "";
+  if (!alerts || !alerts.length) {
+    box.innerHTML = "<p>No severe national alerts right now.</p>";
+    return;
+  }
+  const groups = {};
+  alerts.forEach(f => {
+    const cat = alertCategory((f.properties || {}).event);
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(f);
+  });
+  const order = ["Tornado", "Severe Thunderstorm", "Flood", "Hurricane and Tropical", "Winter", "Heat", "Fire Weather", "Wind", "Other"];
+  order.forEach(cat => {
+    const items = groups[cat];
+    if (!items || !items.length) return;
+    const heading = document.createElement("h3");
+    heading.textContent = cat + " (" + items.length + ")";
+    box.appendChild(heading);
+    const list = document.createElement("ul");
+    items.slice(0, 8).forEach(f => {
+      const p = f.properties || {};
+      const li = document.createElement("li");
+      const area = (p.areaDesc || "").split(";").slice(0, 2).join(", ");
+      li.textContent = (p.event || "Alert") + " - " + area;
+      list.appendChild(li);
+    });
+    box.appendChild(list);
+    if (items.length > 8) {
+      const more = document.createElement("p");
+      more.textContent = "Plus " + (items.length - 8) + " more " + cat.toLowerCase() + " alerts.";
+      box.appendChild(more);
+    }
+  });
+}
+
+/* ---------- Rendering ---------- */
+function el(id) { return document.getElementById(id); }
+function setStatus(msg) { el("status-line").textContent = msg || ""; }
+
+function renderAlerts(alerts) {
+  const box = el("alerts");
+  box.innerHTML = "";
+  if (!alerts || !alerts.length) return;
+  const wrap = document.createElement("div");
+  wrap.className = "alert-banner";
+  wrap.setAttribute("role", "alert");
+  const h = document.createElement("h2");
+  h.textContent = "⚠ Weather alerts (" + alerts.length + ")";
+  wrap.appendChild(h);
+  alerts.forEach(f => {
+    const p = (f && f.properties) || {};
+    const item = document.createElement("div");
+    item.className = "alert-item";
+    const ev = document.createElement("div");
+    ev.className = "alert-event";
+    ev.textContent = p.event || "Alert";
+    item.appendChild(ev);
+    if (p.headline) {
+      const d = document.createElement("div");
+      d.className = "alert-desc";
+      d.textContent = p.headline;
+      item.appendChild(d);
+    }
+    wrap.appendChild(item);
+  });
+  box.appendChild(wrap);
+}
+
+function renderCurrent(current, aqi, daily) {
+  el("current-temp").textContent = fmtTemp(current.temperature_2m);
+  el("current-condition").textContent = describeCode(current.weather_code);
+  el("d-feels").textContent = fmtTemp(current.apparent_temperature);
+  el("d-humidity").textContent = (current.relative_humidity_2m !== undefined ? current.relative_humidity_2m + "%" : "--");
+  const w = current.wind_speed_10m;
+  el("d-wind").textContent = (w !== undefined ? fmtWind(w) + " " + compass(current.wind_direction_10m || 0) : "--");
+  el("d-pressure").textContent = (current.pressure_msl !== undefined ? Math.round(current.pressure_msl) + " hPa" : "--");
+  const uv = current.uv_index;
+  el("d-uv").textContent = (uv !== undefined ? uvLabel(uv) : "--");
+  el("d-aqi").textContent = aqi ? aqiLabel(aqi.us_aqi) : "--";
+  if (daily && daily.sunrise && daily.sunrise[0] && daily.sunset && daily.sunset[0]) {
+    el("d-sunrise").textContent = fmtTime(daily.sunrise[0]);
+    el("d-sunset").textContent = fmtTime(daily.sunset[0]);
+  } else {
+    el("d-sunrise").textContent = "--";
+    el("d-sunset").textContent = "--";
+  }
+}
+
+function uvLabel(uv) {
+  const u = Math.round(uv);
+  if (u <= 2) return u + " (Low)";
+  if (u <= 5) return u + " (Moderate)";
+  if (u <= 7) return u + " (High)";
+  if (u <= 10) return u + " (Very high)";
+  return u + " (Extreme)";
+}
+
+function aqiLabel(aqi) {
+  if (aqi === undefined || aqi === null) return "--";
+  const a = Math.round(aqi);
+  if (a <= 50) return a + " (Good)";
+  if (a <= 100) return a + " (Moderate)";
+  if (a <= 150) return a + " (Unhealthy for sensitive)";
+  if (a <= 200) return a + " (Unhealthy)";
+  if (a <= 300) return a + " (Very unhealthy)";
+  return a + " (Hazardous)";
+}
+
+function fmtTime(iso) {
+  try {
+    const d = new Date(iso);
+    let hr = d.getHours();
+    const ampm = hr >= 12 ? "PM" : "AM";
+    hr = hr % 12; if (hr === 0) hr = 12;
+    const min = String(d.getMinutes()).padStart(2, "0");
+    return hr + ":" + min + " " + ampm;
+  } catch (e) { return "--"; }
+}
+
+function renderHourly(hourly, nowIso) {
+  const list = el("hourly-list");
+  list.innerHTML = "";
+  if (!hourly || !hourly.time) return;
+  let start = 0;
+  for (let i = 0; i < hourly.time.length; i++) {
+    if (hourly.time[i] >= nowIso) { start = i; break; }
+  }
+  for (let i = start; i < Math.min(start + 24, hourly.time.length); i++) {
+    const d = new Date(hourly.time[i]);
+    let hr = d.getHours();
+    const ampm = hr >= 12 ? "PM" : "AM";
+    hr = hr % 12; if (hr === 0) hr = 12;
+    const item = document.createElement("div");
+    item.className = "hour-item";
+    item.setAttribute("role", "listitem");
+    const label = (i === start ? "Now" : hr + " " + ampm) + ", " +
+      describeCode(hourly.weather_code[i]) + ", " + fmtTemp(hourly.temperature_2m[i]) +
+      ", rain " + (hourly.precipitation_probability[i] || 0) + " percent";
+    item.setAttribute("aria-label", label);
+    const t = document.createElement("div"); t.className = "h-time"; t.textContent = (i === start ? "Now" : hr + " " + ampm);
+    const tp = document.createElement("div"); tp.className = "h-temp"; tp.textContent = fmtTemp(hourly.temperature_2m[i]);
+    const c = document.createElement("div"); c.className = "h-time"; c.textContent = describeCode(hourly.weather_code[i]);
+    const r = document.createElement("div"); r.className = "h-rain"; r.textContent = (hourly.precipitation_probability[i] || 0) + "% rain";
+    item.appendChild(t); item.appendChild(tp); item.appendChild(c); item.appendChild(r);
+    list.appendChild(item);
+  }
+}
+
+function renderDaily(daily) {
+  const list = el("daily-list");
+  list.innerHTML = "";
+  if (!daily || !daily.time) return;
+  const dayNames = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  for (let i = 0; i < daily.time.length; i++) {
+    const d = new Date(daily.time[i] + "T12:00:00");
+    const name = i === 0 ? "Today" : dayNames[d.getDay()];
+    const row = document.createElement("div");
+    row.className = "day-row";
+    row.setAttribute("aria-label", name + ": " + describeCode(daily.weather_code[i]) +
+      ", high " + fmtTemp(daily.temperature_2m_max[i]) + ", low " + fmtTemp(daily.temperature_2m_min[i]) +
+      ", rain " + (daily.precipitation_probability_max[i] || 0) + " percent");
+    const nm = document.createElement("div"); nm.className = "day-name"; nm.textContent = name;
+    const cd = document.createElement("div"); cd.className = "day-cond"; cd.textContent = describeCode(daily.weather_code[i]);
+    const tp = document.createElement("div"); tp.className = "day-temps";
+    const hi = document.createElement("span"); hi.className = "day-high"; hi.textContent = fmtTemp(daily.temperature_2m_max[i]);
+    const lo = document.createElement("span"); lo.className = "day-low"; lo.textContent = fmtTemp(daily.temperature_2m_min[i]);
+    const rn = document.createElement("span"); rn.className = "day-rain"; rn.textContent = (daily.precipitation_probability_max[i] || 0) + "% rain";
+    tp.appendChild(hi); tp.appendChild(lo); tp.appendChild(rn);
+    row.appendChild(nm); row.appendChild(cd); row.appendChild(tp);
+    list.appendChild(row);
+  }
+}
+
+function renderAppInfo() {
+  el("info-version").textContent = WEATHER_APP_VERSION;
+  el("info-storage").textContent = hasNativeStore ? "Phone storage" : "Web storage";
+  el("info-voice").textContent = hasNativeTts ? "Phone voice" : (ttsAvailable() ? "Browser voice" : "Unavailable");
+}
+
+/* ---------- Spoken summary ---------- */
+let lastData = null;
+function speakSummary() {
+  if (!lastData || !lastData.current) { speak("Weather data is not loaded yet."); return; }
+  const c = lastData.current, d = lastData.daily;
+  const locName = lastData.locName || DEFAULT_NAME;
+  let text = "Weather for " + locName + ". Currently " + fmtTemp(c.temperature_2m) +
+    " and " + describeCode(c.weather_code) + ". Feels like " + fmtTemp(c.apparent_temperature) + ". ";
+  if (d && d.time && d.time.length) {
+    text += "Today's high " + fmtTemp(d.temperature_2m_max[0]) + ", low " + fmtTemp(d.temperature_2m_min[0]) + ". ";
+    if (d.time.length > 1) {
+      text += "Tomorrow: " + describeCode(d.weather_code[1]) + ", high " + fmtTemp(d.temperature_2m_max[1]) + ". ";
+    }
+  }
+  const alerts = lastData.alerts || [];
+  if (alerts.length) {
+    text += "Active weather alerts: ";
+    alerts.forEach(f => { const p = (f && f.properties) || {}; text += (p.event || "Alert") + ". "; });
+  } else {
+    text += "No active weather alerts. ";
+  }
+  const national = lastData.national || [];
+  if (national.length) {
+    const top = national.slice(0, 3);
+    text += "National severe weather: ";
+    top.forEach(f => {
+      const p = (f && f.properties) || {};
+      const area = (p.areaDesc || "").split(";")[0] || "";
+      text += (p.event || "Alert") + " in " + area + ". ";
+    });
+    if (national.length > 3) text += "Plus " + (national.length - 3) + " more national alerts. ";
+  } else {
+    text += "No national severe weather alerts. ";
+  }
+  const cur = lastData.current || {};
+  if (cur.uv_index !== undefined) text += "UV index " + uvLabel(cur.uv_index) + ". ";
+  const aq = lastData.aqi;
+  if (aq && aq.us_aqi !== undefined) text += "Air quality " + aqiLabel(aq.us_aqi) + ". ";
+  const dd = lastData.daily;
+  if (dd && dd.sunrise && dd.sunrise[0]) text += "Sunrise " + fmtTime(dd.sunrise[0]) + ", sunset " + fmtTime(dd.sunset[0]) + ". ";
+  speak(text);
+}
+
+/* ---------- Location ---------- */
+function getPosition() {
+  return new Promise(resolve => {
+    if (settings.locMode !== "auto") { resolve({ lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_NAME, auto: false }); return; }
+    let done = false;
+    const finish = (v) => { if (!done) { done = true; resolve(v); } };
+    try {
+      if (!("geolocation" in navigator)) { finish({ lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_NAME, auto: false }); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => finish({ lat: pos.coords.latitude, lon: pos.coords.longitude, name: "Current location", auto: true }),
+        () => finish({ lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_NAME, auto: false }),
+        { timeout: 8000, maximumAge: 600000 }
+      );
+      setTimeout(() => finish({ lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_NAME, auto: false }), 9000);
+    } catch (e) { finish({ lat: DEFAULT_LAT, lon: DEFAULT_LON, name: DEFAULT_NAME, auto: false }); }
+  });
+}
+
+/* ---------- Load & refresh ---------- */
+async function refresh(manual) {
+  if (manual) setStatus("Updating…");
+  const pos = await getPosition();
+  el("location-name").textContent = "📍 " + pos.name;
+  try {
+    const [wx, alerts, national, aqi] = await Promise.all([
+      fetchJson(openMeteoUrl(pos.lat, pos.lon)),
+      fetchNwsAlerts(pos.lat, pos.lon),
+      fetchNationalAlerts(),
+      fetchAirQuality(pos.lat, pos.lon)
+    ]);
+    lastData = { current: wx.current, hourly: wx.hourly, daily: wx.daily, alerts: alerts, national: national, aqi: aqi, locName: pos.name, updatedAt: Date.now() };
+    try { appStorage.setItem(STORE_KEY + ".cache", JSON.stringify(lastData)); } catch (e) {}
+    renderCurrent(wx.current, aqi, wx.daily);
+    renderHourly(wx.hourly, wx.current.time);
+    renderDaily(wx.daily);
+    renderAlerts(alerts);
+    renderNationalAlerts(national);
+    setStatus("Updated just now.");
+  } catch (e) {
+    // Offline: fall back to cached data if we have it
+    try {
+      const raw = appStorage.getItem(STORE_KEY + ".cache");
+      if (raw) {
+        const cached = JSON.parse(raw);
+        lastData = cached;
+        el("location-name").textContent = "📍 " + (cached.locName || DEFAULT_NAME);
+        renderCurrent(cached.current, cached.aqi, cached.daily);
+        renderHourly(cached.hourly, cached.current.time);
+        renderDaily(cached.daily);
+        renderAlerts(cached.alerts);
+        renderNationalAlerts(cached.national);
+        const mins = Math.round((Date.now() - (cached.updatedAt || Date.now())) / 60000);
+        setStatus("Offline — showing data from " + mins + " min ago.");
+        return;
+      }
+    } catch (e2) {}
+    setStatus("Could not load weather. Check your connection and tap Refresh.");
+    el("current-condition").textContent = "Could not load weather.";
+  }
+}
+
+/* ---------- Settings UI ---------- */
+function syncSettingsUI() {
+  el("unit-f").setAttribute("aria-pressed", settings.units === "F" ? "true" : "false");
+  el("unit-c").setAttribute("aria-pressed", settings.units === "C" ? "true" : "false");
+  el("loc-auto").setAttribute("aria-pressed", settings.locMode === "auto" ? "true" : "false");
+  el("loc-home").setAttribute("aria-pressed", settings.locMode === "home" ? "true" : "false");
+}
+function rerenderWithSettings() {
+  if (!lastData) return;
+  renderCurrent(lastData.current);
+  renderHourly(lastData.hourly, lastData.current.time);
+  renderDaily(lastData.daily);
+}
+
+/* ---------- Init ---------- */
+document.addEventListener("DOMContentLoaded", () => {
+  renderAppInfo();
+  syncSettingsUI();
+  el("refresh-btn").addEventListener("click", () => refresh(true));
+  el("speak-btn").addEventListener("click", speakSummary);
+  el("unit-f").addEventListener("click", () => { settings.units = "F"; saveSettings(settings); syncSettingsUI(); rerenderWithSettings(); });
+  el("unit-c").addEventListener("click", () => { settings.units = "C"; saveSettings(settings); syncSettingsUI(); rerenderWithSettings(); });
+  el("loc-auto").addEventListener("click", () => { settings.locMode = "auto"; saveSettings(settings); syncSettingsUI(); refresh(true); });
+  el("loc-home").addEventListener("click", () => { settings.locMode = "home"; saveSettings(settings); syncSettingsUI(); refresh(true); });
+  // Show cached data instantly, then refresh
+  try {
+    const raw = appStorage.getItem(STORE_KEY + ".cache");
+    if (raw) {
+      const cached = JSON.parse(raw);
+      if (cached && cached.current) {
+        lastData = cached;
+        el("location-name").textContent = "📍 " + (cached.locName || DEFAULT_NAME);
+        renderCurrent(cached.current, cached.aqi, cached.daily);
+        renderHourly(cached.hourly, cached.current.time);
+        renderDaily(cached.daily);
+        renderAlerts(cached.alerts);
+        renderNationalAlerts(cached.national);
+      }
+    }
+  } catch (e) {}
+  refresh(false);
+});
+</script>
+</body>
+</html>
