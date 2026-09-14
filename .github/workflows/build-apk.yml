@@ -129,6 +129,8 @@ jobs:
           public class MainActivity extends Activity {
               private WebView webView;
               private static final int LOCATION_REQUEST = 1002;
+              private GeolocationPermissions.Callback pendingGeoCallback = null;
+              private String pendingGeoOrigin = null;
               private TextToSpeech tts;
               private boolean ttsReady = false;
               private String pendingTts = null;
@@ -145,12 +147,16 @@ jobs:
                   webView.setWebChromeClient(new WebChromeClient() {
                       @Override
                       public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                          callback.invoke(origin, true, false);
+                          if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                              callback.invoke(origin, true, false);
+                          } else {
+                              // Hold the page's location request, ask Android for permission, then answer it.
+                              pendingGeoOrigin = origin;
+                              pendingGeoCallback = callback;
+                              requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
+                          }
                       }
                   });
-                  if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                      requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATION_REQUEST);
-                  }
                   webView.addJavascriptInterface(new Object() {
                       @JavascriptInterface
                       public void setItem(String key, String value) {
@@ -221,6 +227,23 @@ jobs:
                   setContentView(webView);
               }
 
+
+              @Override
+              protected void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+                  super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                  if (requestCode == LOCATION_REQUEST) {
+                      boolean granted = grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                      if (pendingGeoCallback != null) {
+                          try { pendingGeoCallback.invoke(pendingGeoOrigin, granted, false); } catch (Exception ignored) {}
+                          pendingGeoCallback = null;
+                          pendingGeoOrigin = null;
+                      }
+                      if (granted && webView != null) {
+                          // Permission arrived after the page asked: retry the location lookup.
+                          try { webView.evaluateJavascript("if (window.refresh) refresh(false);", null); } catch (Exception ignored) {}
+                      }
+                  }
+              }
 
               @Override
               protected void onDestroy() {
