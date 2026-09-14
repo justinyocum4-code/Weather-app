@@ -1,4 +1,4 @@
-name: Build APK
+lname: Build APK
 
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
             exit 1
           fi
 
-          mkdir -p app/src/main/java/com/workoutapp/app app/src/main/assets/www
+          mkdir -p app/src/main/java/com/weatherapp/app app/src/main/assets/www
 
           cp "$HTML_FILE" app/src/main/assets/www/index.html
 
@@ -111,7 +111,7 @@ jobs:
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/workoutapp/app/MainActivity.java <<'EOF'
+          cat > app/src/main/java/com/weatherapp/app/MainActivity.java <<'EOF'
           package com.weatherapp.app;
 
           import android.app.Activity;
