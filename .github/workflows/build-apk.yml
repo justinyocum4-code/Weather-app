@@ -4,10 +4,32 @@ on:
   push:
     branches: [ main ]
   workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Version name (e.g. 4.6.5)'
+        required: false
+        type: string
+        default: ''
+      version_code:
+        description: 'Version code - must be a whole number bigger than last time'
+        required: false
+        type: string
+        default: ''
+      release_notes:
+        description: 'What changed in this version (shown in the store)'
+        required: false
+        type: string
+        default: ''
 
 jobs:
   build:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
+    env:
+      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.5' }}
+      APP_VERSION_CODE: ${{ inputs.version_code || '42' }}
+      APP_RELEASE_NOTES: ${{ inputs.release_notes || 'Update' }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -85,11 +107,12 @@ jobs:
                   applicationId 'com.weatherapp.app'
                   minSdk 24
                   targetSdk 34
-                  versionCode 42
-                  versionName '4.6.5'
+                  versionCode __APP_VERSION_CODE__
+                  versionName '__APP_VERSION_NAME__'
               }
           }
           EOF
+          sed -i "s/__APP_VERSION_CODE__/$APP_VERSION_CODE/g; s/__APP_VERSION_NAME__/$APP_VERSION_NAME/g" app/build.gradle
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <?xml version="1.0" encoding="utf-8"?>
@@ -303,3 +326,12 @@ jobs:
         with:
           name: weather-app-apk
           path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Publish GitHub release
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.APP_VERSION_NAME }}+${{ env.APP_VERSION_CODE }}
+          name: v${{ env.APP_VERSION_NAME }}+${{ env.APP_VERSION_CODE }}
+          body: ${{ env.APP_RELEASE_NOTES }}
+          files: app/build/outputs/apk/release/app-release.apk
