@@ -71,6 +71,16 @@ jobs:
 
           cp "$HTML_FILE" app/src/main/assets/www/index.html
 
+          mkdir -p app/src/main/res/drawable
+          ICON_ATTR=""
+          if [ -f app_icon.png ]; then
+            cp app_icon.png app/src/main/res/drawable/app_icon.png
+            ICON_ATTR='android:icon="@drawable/app_icon"'
+            echo "App icon installed."
+          else
+            echo "WARNING: app_icon.png not found; default icon used."
+          fi
+
           cat > settings.gradle <<'EOF'
           pluginManagement {
               repositories {
@@ -114,13 +124,14 @@ jobs:
           EOF
           sed -i "s/__APP_VERSION_CODE__/$APP_VERSION_CODE/g; s/__APP_VERSION_NAME__/$APP_VERSION_NAME/g" app/build.gradle
 
-          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          cat > app/src/main/AndroidManifest.xml <<EOF
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
               <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
               <application
                   android:label="Weather"
+                  $ICON_ATTR
                   android:theme="@android:style/Theme.Material.Light.NoActionBar">
                   <activity
                       android:name="com.weatherapp.app.MainActivity"
