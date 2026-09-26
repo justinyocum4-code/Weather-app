@@ -176,6 +176,8 @@ jobs:
                   webView.getSettings().setJavaScriptEnabled(true);
                   webView.getSettings().setDomStorageEnabled(true);
                   webView.getSettings().setAllowFileAccess(true);
+                  webView.getSettings().setAllowFileAccessFromFileURLs(true);
+                  webView.getSettings().setAllowUniversalAccessFromFileURLs(true);
                   webView.setWebViewClient(new WebViewClient());
                   webView.getSettings().setGeolocationEnabled(true);
                   webView.setWebChromeClient(new WebChromeClient() {
