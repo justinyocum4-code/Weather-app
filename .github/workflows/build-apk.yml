@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: 'Version name (e.g. 4.6.15)'
+        description: 'Version name (e.g. 4.6.16)'
         required: false
         type: string
         default: ''
@@ -27,8 +27,8 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     env:
-      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.15' }}
-      APP_VERSION_CODE: ${{ inputs.version_code || '52' }}
+      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.16' }}
+      APP_VERSION_CODE: ${{ inputs.version_code || '53' }}
       APP_RELEASE_NOTES: ${{ inputs.release_notes || 'Update' }}
     steps:
       - name: Check out code
