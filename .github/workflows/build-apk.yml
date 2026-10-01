@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: 'Version name (e.g. 4.6.14)'
+        description: 'Version name (e.g. 4.6.15)'
         required: false
         type: string
         default: ''
@@ -27,8 +27,8 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     env:
-      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.14' }}
-      APP_VERSION_CODE: ${{ inputs.version_code || '51' }}
+      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.15' }}
+      APP_VERSION_CODE: ${{ inputs.version_code || '52' }}
       APP_RELEASE_NOTES: ${{ inputs.release_notes || 'Update' }}
     steps:
       - name: Check out code
@@ -130,10 +130,17 @@ jobs:
               <uses-permission android:name="android.permission.INTERNET" />
               <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
               <uses-permission android:name="android.permission.WAKE_LOCK" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
               <application
                   android:label="Weather"
                   $ICON_ATTR
                   android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  <service
+                      android:name="com.weatherapp.app.RadioService"
+                      android:exported="false"
+                      android:foregroundServiceType="mediaPlayback" />
                   <activity
                       android:name="com.weatherapp.app.MainActivity"
                       android:exported="true">
@@ -151,11 +158,10 @@ jobs:
 
           import android.app.Activity;
           import android.Manifest;
+          import android.content.Intent;
           import android.content.pm.PackageManager;
-          import android.media.AudioAttributes;
-          import android.media.MediaPlayer;
+          import android.os.Build;
           import android.os.Bundle;
-          import android.os.PowerManager;
           import android.speech.tts.TextToSpeech;
           import android.webkit.GeolocationPermissions;
           import android.webkit.JavascriptInterface;
@@ -172,7 +178,6 @@ jobs:
               private TextToSpeech tts;
               private boolean ttsReady = false;
               private String pendingTts = null;
-              private MediaPlayer radioPlayer;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -260,77 +265,46 @@ jobs:
                           } catch (Exception ignored) {}
                       }
                   }, "LynxosTts");
-                  // NOAA Weather Radio: native MediaPlayer with a partial wake lock so
-                  // playback continues when the screen turns off. JS calls
-                  // window.nwrNativeError() when a stream fails so it can try the next URL.
+                  // NOAA Weather Radio: playback runs in a foreground service
+                  // (RadioService) with a persistent notification, which is what
+                  // Android requires to keep audio playing with the screen off.
+                  // The JS surface is unchanged: play/stop/setVolume, and the
+                  // service reports stream errors back through window.nwrNativeError().
+                  RadioService.setErrorListener(new RadioService.ErrorListener() {
+                      @Override
+                      public void onRadioError() {
+                          notifyRadioError();
+                      }
+                  });
                   webView.addJavascriptInterface(new Object() {
                       @JavascriptInterface
                       public void play(final String url) {
-                          runOnUiThread(new Runnable() {
-                              @Override
-                              public void run() {
-                                  try {
-                                      stopRadioInternal();
-                                      radioPlayer = new MediaPlayer();
-                                      radioPlayer.setAudioAttributes(new AudioAttributes.Builder()
-                                          .setUsage(AudioAttributes.USAGE_MEDIA)
-                                          .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                                          .build());
-                                      radioPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
-                                      radioPlayer.setDataSource(url);
-                                      radioPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                                          @Override
-                                          public void onPrepared(MediaPlayer mp) {
-                                              try { mp.start(); } catch (Exception ignored) {}
-                                          }
-                                      });
-                                      radioPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
-                                          @Override
-                                          public boolean onError(MediaPlayer mp, int what, int extra) {
-                                              stopRadioInternal();
-                                              notifyRadioError();
-                                              return true;
-                                          }
-                                      });
-                                      radioPlayer.prepareAsync();
-                                  } catch (Exception e) {
-                                      stopRadioInternal();
-                                      notifyRadioError();
-                                  }
+                          try {
+                              Intent i = new Intent(MainActivity.this, RadioService.class)
+                                  .setAction(RadioService.ACTION_PLAY)
+                                  .putExtra(RadioService.EXTRA_URL, url);
+                              if (Build.VERSION.SDK_INT >= 26) {
+                                  startForegroundService(i);
+                              } else {
+                                  startService(i);
                               }
-                          });
+                          } catch (Exception e) {
+                              notifyRadioError();
+                          }
                       }
                       @JavascriptInterface
                       public void stop() {
-                          runOnUiThread(new Runnable() {
-                              @Override
-                              public void run() {
-                                  stopRadioInternal();
-                              }
-                          });
+                          try {
+                              startService(new Intent(MainActivity.this, RadioService.class)
+                                  .setAction(RadioService.ACTION_STOP));
+                          } catch (Exception ignored) {}
                       }
                       @JavascriptInterface
                       public void setVolume(final float v) {
-                          runOnUiThread(new Runnable() {
-                              @Override
-                              public void run() {
-                                  try {
-                                      if (radioPlayer != null) radioPlayer.setVolume(v, v);
-                                  } catch (Exception ignored) {}
-                              }
-                          });
-                      }
-                      private void notifyRadioError() {
                           try {
-                              final WebView wv = webView;
-                              if (wv != null) {
-                                  wv.post(new Runnable() {
-                                      @Override
-                                      public void run() {
-                                          try { wv.evaluateJavascript("if (window.nwrNativeError) window.nwrNativeError();", null); } catch (Exception ignored) {}
-                                      }
-                                  });
-                              }
+                              startService(new Intent(MainActivity.this, RadioService.class)
+                                  .setAction(RadioService.ACTION_SET_VOLUME)
+                                  .putExtra(RadioService.EXTRA_VOLUME, v));
                           } catch (Exception ignored) {}
                       }
                   }, "LynxosRadio");
@@ -362,7 +336,10 @@ jobs:
 
               @Override
               protected void onDestroy() {
-                  stopRadioInternal();
+                  try {
+                      startService(new Intent(this, RadioService.class).setAction(RadioService.ACTION_STOP));
+                  } catch (Exception ignored) {}
+                  RadioService.setErrorListener(null);
                   if (tts != null) {
                       try {
                           tts.stop();
@@ -373,12 +350,16 @@ jobs:
                   super.onDestroy();
               }
 
-              private void stopRadioInternal() {
+              private void notifyRadioError() {
                   try {
-                      if (radioPlayer != null) {
-                          try { radioPlayer.stop(); } catch (Exception ignored) {}
-                          try { radioPlayer.release(); } catch (Exception ignored) {}
-                          radioPlayer = null;
+                      final WebView wv = webView;
+                      if (wv != null) {
+                          wv.post(new Runnable() {
+                              @Override
+                              public void run() {
+                                  try { wv.evaluateJavascript("if (window.nwrNativeError) window.nwrNativeError();", null); } catch (Exception ignored) {}
+                              }
+                          });
                       }
                   } catch (Exception ignored) {}
               }
@@ -398,6 +379,180 @@ jobs:
                   } else {
                       super.onBackPressed();
                   }
+              }
+          }
+          EOF
+
+          cat > app/src/main/java/com/weatherapp/app/RadioService.java <<'EOF'
+          package com.weatherapp.app;
+
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.app.PendingIntent;
+          import android.app.Service;
+          import android.content.Intent;
+          import android.content.pm.ServiceInfo;
+          import android.media.AudioAttributes;
+          import android.media.MediaPlayer;
+          import android.os.Build;
+          import android.os.IBinder;
+          import android.os.PowerManager;
+
+          // NOAA Weather Radio playback. A foreground service with a persistent
+          // notification is what Android requires to keep audio playing when the
+          // screen turns off; a wake lock alone gets suspended by the system.
+          public class RadioService extends Service {
+              public static final String ACTION_PLAY = "com.weatherapp.app.RadioService.PLAY";
+              public static final String ACTION_STOP = "com.weatherapp.app.RadioService.STOP";
+              public static final String ACTION_SET_VOLUME = "com.weatherapp.app.RadioService.SET_VOLUME";
+              public static final String EXTRA_URL = "url";
+              public static final String EXTRA_VOLUME = "volume";
+
+              private static final int NOTIF_ID = 4101;
+              private static final String CHANNEL_ID = "nwr_radio";
+
+              private MediaPlayer player;
+              private static volatile ErrorListener errorListener;
+
+              public interface ErrorListener {
+                  void onRadioError();
+              }
+
+              public static void setErrorListener(ErrorListener l) {
+                  errorListener = l;
+              }
+
+              @Override
+              public IBinder onBind(Intent intent) {
+                  return null;
+              }
+
+              @Override
+              public void onCreate() {
+                  super.onCreate();
+                  createChannel();
+              }
+
+              @Override
+              public int onStartCommand(Intent intent, int flags, int startId) {
+                  if (intent == null) {
+                      return START_NOT_STICKY;
+                  }
+                  String action = intent.getAction();
+                  if (ACTION_PLAY.equals(action)) {
+                      goForeground();
+                      playUrl(intent.getStringExtra(EXTRA_URL));
+                  } else if (ACTION_STOP.equals(action)) {
+                      stopPlayback();
+                      try { stopForeground(true); } catch (Exception ignored) {}
+                      stopSelf();
+                  } else if (ACTION_SET_VOLUME.equals(action)) {
+                      float v = intent.getFloatExtra(EXTRA_VOLUME, 0.8f);
+                      try {
+                          if (player != null) player.setVolume(v, v);
+                      } catch (Exception ignored) {}
+                  }
+                  return START_NOT_STICKY;
+              }
+
+              @Override
+              public void onDestroy() {
+                  stopPlayback();
+                  super.onDestroy();
+              }
+
+              private void createChannel() {
+                  if (Build.VERSION.SDK_INT >= 26) {
+                      try {
+                          NotificationChannel ch = new NotificationChannel(
+                              CHANNEL_ID, "Weather Radio", NotificationManager.IMPORTANCE_LOW);
+                          ch.setDescription("NOAA Weather Radio playback");
+                          NotificationManager nm = getSystemService(NotificationManager.class);
+                          if (nm != null) nm.createNotificationChannel(ch);
+                      } catch (Exception ignored) {}
+                  }
+              }
+
+              private void goForeground() {
+                  try {
+                      Intent open = new Intent(this, MainActivity.class);
+                      open.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                      int pflags = PendingIntent.FLAG_UPDATE_CURRENT;
+                      if (Build.VERSION.SDK_INT >= 23) {
+                          pflags |= PendingIntent.FLAG_IMMUTABLE;
+                      }
+                      PendingIntent pi = PendingIntent.getActivity(this, 0, open, pflags);
+                      Notification.Builder b;
+                      if (Build.VERSION.SDK_INT >= 26) {
+                          b = new Notification.Builder(this, CHANNEL_ID);
+                      } else {
+                          b = new Notification.Builder(this);
+                      }
+                      Notification n = b.setContentTitle("NOAA Weather Radio")
+                          .setContentText("Playing — open the Weather app to stop")
+                          .setSmallIcon(android.R.drawable.ic_lock_silent_mode_off)
+                          .setContentIntent(pi)
+                          .setOngoing(true)
+                          .build();
+                      if (Build.VERSION.SDK_INT >= 29) {
+                          startForeground(NOTIF_ID, n, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK);
+                      } else {
+                          startForeground(NOTIF_ID, n);
+                      }
+                  } catch (Exception ignored) {}
+              }
+
+              private void playUrl(final String url) {
+                  stopPlayback();
+                  if (url == null || url.isEmpty()) {
+                      reportError();
+                      return;
+                  }
+                  try {
+                      player = new MediaPlayer();
+                      player.setAudioAttributes(new AudioAttributes.Builder()
+                          .setUsage(AudioAttributes.USAGE_MEDIA)
+                          .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                          .build());
+                      player.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                      player.setDataSource(url);
+                      player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                          @Override
+                          public void onPrepared(MediaPlayer mp) {
+                              try { mp.start(); } catch (Exception e) { reportError(); }
+                          }
+                      });
+                      player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                          @Override
+                          public boolean onError(MediaPlayer mp, int what, int extra) {
+                              stopPlayback();
+                              reportError();
+                              return true;
+                          }
+                      });
+                      player.prepareAsync();
+                  } catch (Exception e) {
+                      stopPlayback();
+                      reportError();
+                  }
+              }
+
+              private void stopPlayback() {
+                  try {
+                      if (player != null) {
+                          try { player.stop(); } catch (Exception ignored) {}
+                          try { player.release(); } catch (Exception ignored) {}
+                          player = null;
+                      }
+                  } catch (Exception ignored) {}
+              }
+
+              private void reportError() {
+                  try {
+                      ErrorListener l = errorListener;
+                      if (l != null) l.onRadioError();
+                  } catch (Exception ignored) {}
               }
           }
           EOF
