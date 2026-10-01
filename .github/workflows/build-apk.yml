@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version_name:
-        description: 'Version name (e.g. 4.6.5)'
+        description: 'Version name (e.g. 4.6.14)'
         required: false
         type: string
         default: ''
@@ -27,8 +27,8 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     env:
-      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.5' }}
-      APP_VERSION_CODE: ${{ inputs.version_code || '42' }}
+      APP_VERSION_NAME: ${{ inputs.version_name || '4.6.14' }}
+      APP_VERSION_CODE: ${{ inputs.version_code || '51' }}
       APP_RELEASE_NOTES: ${{ inputs.release_notes || 'Update' }}
     steps:
       - name: Check out code
@@ -129,6 +129,7 @@ jobs:
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
               <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <uses-permission android:name="android.permission.WAKE_LOCK" />
               <application
                   android:label="Weather"
                   $ICON_ATTR
@@ -151,7 +152,10 @@ jobs:
           import android.app.Activity;
           import android.Manifest;
           import android.content.pm.PackageManager;
+          import android.media.AudioAttributes;
+          import android.media.MediaPlayer;
           import android.os.Bundle;
+          import android.os.PowerManager;
           import android.speech.tts.TextToSpeech;
           import android.webkit.GeolocationPermissions;
           import android.webkit.JavascriptInterface;
@@ -168,6 +172,7 @@ jobs:
               private TextToSpeech tts;
               private boolean ttsReady = false;
               private String pendingTts = null;
+              private MediaPlayer radioPlayer;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
@@ -255,6 +260,80 @@ jobs:
                           } catch (Exception ignored) {}
                       }
                   }, "LynxosTts");
+                  // NOAA Weather Radio: native MediaPlayer with a partial wake lock so
+                  // playback continues when the screen turns off. JS calls
+                  // window.nwrNativeError() when a stream fails so it can try the next URL.
+                  webView.addJavascriptInterface(new Object() {
+                      @JavascriptInterface
+                      public void play(final String url) {
+                          runOnUiThread(new Runnable() {
+                              @Override
+                              public void run() {
+                                  try {
+                                      stopRadioInternal();
+                                      radioPlayer = new MediaPlayer();
+                                      radioPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                                          .setUsage(AudioAttributes.USAGE_MEDIA)
+                                          .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                                          .build());
+                                      radioPlayer.setWakeMode(getApplicationContext(), PowerManager.PARTIAL_WAKE_LOCK);
+                                      radioPlayer.setDataSource(url);
+                                      radioPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                                          @Override
+                                          public void onPrepared(MediaPlayer mp) {
+                                              try { mp.start(); } catch (Exception ignored) {}
+                                          }
+                                      });
+                                      radioPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+                                          @Override
+                                          public boolean onError(MediaPlayer mp, int what, int extra) {
+                                              stopRadioInternal();
+                                              notifyRadioError();
+                                              return true;
+                                          }
+                                      });
+                                      radioPlayer.prepareAsync();
+                                  } catch (Exception e) {
+                                      stopRadioInternal();
+                                      notifyRadioError();
+                                  }
+                              }
+                          });
+                      }
+                      @JavascriptInterface
+                      public void stop() {
+                          runOnUiThread(new Runnable() {
+                              @Override
+                              public void run() {
+                                  stopRadioInternal();
+                              }
+                          });
+                      }
+                      @JavascriptInterface
+                      public void setVolume(final float v) {
+                          runOnUiThread(new Runnable() {
+                              @Override
+                              public void run() {
+                                  try {
+                                      if (radioPlayer != null) radioPlayer.setVolume(v, v);
+                                  } catch (Exception ignored) {}
+                              }
+                          });
+                      }
+                      private void notifyRadioError() {
+                          try {
+                              final WebView wv = webView;
+                              if (wv != null) {
+                                  wv.post(new Runnable() {
+                                      @Override
+                                      public void run() {
+                                          try { wv.evaluateJavascript("if (window.nwrNativeError) window.nwrNativeError();", null); } catch (Exception ignored) {}
+                                      }
+                                  });
+                              }
+                          } catch (Exception ignored) {}
+                      }
+                  }, "LynxosRadio");
                   if (savedInstanceState != null) {
                       webView.restoreState(savedInstanceState);
                   } else {
@@ -283,6 +362,7 @@ jobs:
 
               @Override
               protected void onDestroy() {
+                  stopRadioInternal();
                   if (tts != null) {
                       try {
                           tts.stop();
@@ -291,6 +371,16 @@ jobs:
                       tts = null;
                   }
                   super.onDestroy();
+              }
+
+              private void stopRadioInternal() {
+                  try {
+                      if (radioPlayer != null) {
+                          try { radioPlayer.stop(); } catch (Exception ignored) {}
+                          try { radioPlayer.release(); } catch (Exception ignored) {}
+                          radioPlayer = null;
+                      }
+                  } catch (Exception ignored) {}
               }
 
               @Override
