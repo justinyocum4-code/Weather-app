@@ -419,7 +419,7 @@
 <script>
 "use strict";
 /* ================= Weather v1.0 ================= */
-const WEATHER_APP_VERSION = "4.6.16";
+const WEATHER_APP_VERSION = "4.6.17";
 var NWR_STATIONS=[["KEC61",162.55,"Mobile, AL",30.6954,-88.0399,"AL",["https://radio.weatherusa.net/NWR/KEC61_2.mp3"]],["KEC94",162.55,"Phoenix, AZ",33.4484,-112.074,"AZ",["https://wxr.gwes-cdn.net/KEC94","https://wxradio.org/AZ-Phoenix-KEC94"]],["WWG42",162.5,"Globe, AZ",33.3942,-110.7865,"AZ",["https://wxr.gwes-cdn.net/WWG42","https://wxradio.org/AZ-Globe-WWG42"]],["WWG41",162.425,"Payson, AZ",34.2309,-111.3251,"AZ",["https://wxr.gwes-cdn.net/WWG41","https://wxradio.org/AZ-PaysonGilaCountyN-WWG41"]],["KEC49",162.55,"San Francisco Bay, CA",37.7749,-122.4194,"CA",["https://wxradio.org/CA-Monterey-KEC49"]],["WNG659",162.525,"El Paso Mountains, CA",35.43,-117.58,"CA",["https://wxr.gwes-cdn.net/WNG659"]],["KIH62",162.4,"Fresno, CA",36.7378,-119.7871,"CA",["https://radio.weatherusa.net/NWR/KIH62_2.mp3"]],["KWO37",162.4,"Los Angeles, CA",34.0522,-118.2437,"CA",["https://wxr.gwes-cdn.net/KWO37"]],["WWF64",162.45,"Monterey Marine, CA",36.6002,-121.8947,"CA",["https://wxradio.org/CA-MontereyMarine-WWF64"]],["KWN54",162.425,"Durango, CO",37.2753,-107.8801,"CO",["https://wxr.gwes-cdn.net/KWN54","https://radio.weatherusa.net/NWR/KWN54.mp3"]],["WXJ42",162.4,"Meriden, CT",41.5382,-72.807,"CT",["https://wxradio.org/CT-Meriden-WXJ42"]],["KIH26",162.4,"Daytona Beach, FL",29.2108,-81.0228,"FL",["https://wxradio.org/FL-DaytonaBeach-KIH26"]],["WZ2531",162.4,"Hialeah (Spanish), FL",25.8576,-80.2781,"FL",["https://wxr.gwes-cdn.net/WZ2531"]],["KHB39",162.4,"Jacksonville, FL",30.3322,-81.6557,"FL",["https://wxr.gwes-cdn.net/KHB39"]],["KEC38",162.4,"Largo, FL",27.9095,-82.7873,"FL",["https://wxradio.org/FL-Largo-KEC38"]],["KHB34",162.4,"Miami, FL",25.7617,-80.1918,"FL",["https://wxr.gwes-cdn.net/KHB34"]],["KIH63",162.475,"Orlando, FL",28.5383,-81.3792,"FL",["https://wxradio.org/FL-Orlando-KIH63"]],["WNG522",162.425,"Palatka, FL",29.6486,-81.6376,"FL",["https://wxradio.org/FL-Palatka-WNG522"]],["KIH24",162.4,"Tallahassee, FL",30.4383,-84.2807,"FL",["https://wxradio.org/FL-Tallahassee-KIH24","http://wxradio.dyndns.org:8000/FL-Tallahassee-KIH24"]],["WNG663",162.4,"Princeton, FL",25.5384,-80.4089,"FL",["https://wxr.gwes-cdn.net/WNG663"]],["KHB32",162.55,"Tampa Bay, FL",27.9506,-82.4572,"FL",["https://wxradio.org/FL-TampaBay-KHB32"]],["WXK56",162.4,"Athens, GA",33.9519,-83.3576,"GA",["https://wxradio.org/GA-Athens-WXK56"]],["KEC80",162.55,"Atlanta, GA",33.749,-84.388,"GA",["https://wxr.gwes-cdn.net/KEC80-ALT","https://wxradio.org/GA-Atlanta-KEC80"]],["WXM32",162.4,"Columbus, GA",32.461,-84.9877,"GA",["https://wxradio.org/AL-Columbus-WXM32","https://radio.weatherusa.net/NWR/WXM32.mp3"]],["WWG75",162.4,"Maui, HI",20.7984,-156.3319,"HI",["https://wxradio.org/HI-Maui-WWG75"]],["WXL57",162.55,"Des Moines, IA",41.5868,-93.625,"IA",["https://radio.weatherusa.net/NWR/WXL57.mp3"]],["WXL62",162.475,"Sioux City, IA",42.4963,-96.4049,"IA",["https://wxradio.org/IA-Sioux_City-WXL62"]],["WXJ76",162.55,"Champaign, IL",40.1164,-88.2434,"IL",["https://wxradio.org/IL-Champaign-WXJ76"]],["KZZ66",162.4,"Galesburg, IL",40.9478,-90.3712,"IL",["https://wxradio.org/IL-Galesburg-KZZ66"]],["KZZ58",162.525,"Kankakee, IL",41.12,-87.8612,"IL",["https://wxradio.org/IL-Kankakee-KZZ58"]],["WXM49",162.425,"Marion, IL",37.7306,-88.9331,"IL",["https://wxradio.org/IL-Marion-WXM49-ALT1"]],["WXJ71",162.475,"Peoria, IL",40.6936,-89.589,"IL",["https://wxradio.org/IL-Peoria-WXJ71"]],["KXI58",162.4,"Plano, IL",41.6628,-88.5368,"IL",["https://wxradio.org/IL-Plano-KXI58"]],["WXJ73",162.55,"Quad Cities, IL",41.5236,-90.5776,"IL",["https://wxradio.org/IL-QuadCities-WXJ73"]],["KZZ81",162.4,"Lockport, IL",41.5895,-88.0573,"IL",["https://wxr.gwes-cdn.net/KZZ81"]],["KEC74",162.55,"Indianapolis, IN",39.7684,-86.1581,"IN",["https://wxradio.org/IN-Indianapolis-KEC74"]],["KIG76",162.4,"Evansville, IN",37.9716,-87.5711,"IN",["https://wxr.gwes-cdn.net/KIG76"]],["WXK91",162.475,"Topeka, KS",39.0473,-95.6752,"KS",["https://wxradio.org/KS-Topeka-WXK91-alt1"]],["WZ2523",162.5,"Frankfort, KY",38.2009,-84.8733,"KY",["https://wxradio.org/KY-Frankfort-WZ2523"]],["KZZ48",162.45,"Owenton, KY",38.5365,-84.8419,"KY",["https://wxradio.org/KY-Owenton-KZZ48"]],["WXJ96",162.55,"Monroe, LA",32.5093,-92.1193,"LA",["https://wxradio.org/LA-Monroe-WXJ96","https://radio.weatherusa.net/NWR/WXJ96_2.mp3"]],["WXJ97",162.4,"Shreveport, LA",32.5252,-93.7502,"LA",["https://wxr.gwes-cdn.net/WXJ97","https://wxradio.org/LA-Shreveport-WXJ97","https://wxradio.org/LA-Shreveport-WXJ97-alt1"]],["WSM60",162.475,"Dresden, ME",44.0834,-69.7312,"ME",["https://wxradio.org/ME-Dresden-WSM60"]],["WXM42",162.475,"Hagerstown, MD",39.6418,-77.72,"MD",["https://wxradio.org/MD-Hagerstown-WXM42","https://noaa-manassas-radio.from-va.com/Hagerstown.mp3"]],["KHB35",162.475,"Boston, MA",42.3601,-71.0589,"MA",["https://radio.weatherusa.net/NWR/KHB35_3.mp3"]],["KEC73",162.55,"Bourne, MA",41.7415,-70.5989,"MA",["https://wxradio.org/MA-Bourne/Hyannis-KEC73"]],["WXL93",162.55,"Worcester, MA",42.2626,-71.8023,"MA",["https://wxradio.org/MA-Worcester-WXL93"]],["WXL25",162.4,"Missoula, MT",46.8721,-113.994,"MT",["https://wxr.gwes-cdn.net/WXL25"]],["KEC63",162.55,"Detroit, MI",42.3314,-83.0458,"MI",["https://radio.weatherusa.net/NWR/KEC63.mp3","https://wxr.gwes-cdn.net/KEC63"]],["KIH29",162.475,"Flint, MI",43.0125,-83.6875,"MI",["https://wxr.gwes-cdn.net/KIH29","https://wxradio.org/MI-Clio-KIH29"]],["WWF36",162.475,"Hesperia, MI",43.5672,-86.0403,"MI",["https://wxradio.org/MI-Hesperia-WWF36"]],["WWF34",162.475,"Kalamazoo, MI",42.2917,-85.5872,"MI",["https://icecast.wxstream.org/NWR/WWF34","https://wxr.gwes-cdn.net/WWF34","https://wxradio.org/MI-Plainwell-WWF34"]],["KZZ33",162.525,"Mount Pleasant, MI",43.5978,-84.7675,"MI",["https://wxr.gwes-cdn.net/KZZ33","https://wxradio.org/MI-MountPleasant-KZZ33","https://wxradio.org/MI-MountPleasant-KZZ33-alt2","https://noaaradio.herseyweather.com/MI-MountPleasant-KZZ33-alt1"]],["WXK81",162.4,"Onondaga, MI",42.4392,-84.5519,"MI",["https://wxr.gwes-cdn.net/WXK81","https://icecast.wxstream.org/NWR/WXK81"]],["KXI33",162.45,"West Branch, MI",44.2764,-84.2386,"MI",["https://wxr.gwes-cdn.net/KXI33","https://wxradio.org/MI-WestBranch-KXI33"]],["WXN99",162.425,"West Olive, MI",42.9189,-86.1767,"MI",["https://wxr.gwes-cdn.net/WXN99-Alt","https://radio.weatherusa.net/NWR/WXN99.mp3"]],["WNG672",162.425,"Wolf Lake, MI",43.7786,-85.4942,"MI",["https://wxradio.org/MI-WolfLake-WNG672","https://noaaradio.herseyweather.com/MI-WolfLake-WNG672-alt1"]],["WZ2560",162.4,"Cannonsburg, MI",43.0631,-85.4967,"MI",["https://wxr.gwes-cdn.net/WZ2560"]],["KEC65",162.55,"Minneapolis, MN",44.9778,-93.265,"MN",["https://radio.weatherusa.net/NWR/KEC65.mp3"]],["WXM99",162.425,"Bemidji, MN",47.4736,-94.8803,"MN",["https://wxr.gwes-cdn.net/WXM99","https://wxr.bemidjiwx.org/WXM99","https://wxradio.org/MN-Bemidji-WXM99"]],["WNG676",162.5,"Clearwater, MN",45.4183,-93.981,"MN",["https://radio.weatherusa.net/NWR/WNG676.mp3","http://wxradio.dyndns.org:8000/NWR/WNG676.mp3"]],["WXJ86",162.55,"La Crescent, MN",43.828,-91.304,"MN",["https://wxradio.org/MN-LaCrescent-WXJ86"]],["WWG98",162.475,"Park Rapids, MN",46.9222,-95.0536,"MN",["https://wxr.gwes-cdn.net/WWG98","https://wxr.bemidjiwx.org/WWG98"]],["KID77",162.55,"Kansas City, MO",39.0997,-94.5786,"MO",["https://wxr.gwes-cdn.net/KID77","https://wxradio.org/MO-KansasCity-KID77","https://radio.weatherusa.net/NWR/KID77_3.mp3"]],["KDO89",162.55,"St. Louis, MO",38.627,-90.1994,"MO",["https://wxradio.org/MO-StLouis-KDO89"]],["WXL46",162.4,"Springfield, MO",37.209,-93.2923,"MO",["https://wxr.gwes-cdn.net/WXL46","https://wxradio.org/MO-Springfield-WXL46"]],["WXL78",162.475,"Bismarck, ND",46.8083,-100.7837,"ND",["https://wxradio.org/ND-Bismarck-WXL78"]],["WWF83",162.4,"Grand Forks, ND",47.9253,-97.0329,"ND",["https://wxr.gwes-cdn.net/WWF83","https://wxradio.org/ND-GrandForks-WWF83"]],["WXM38",162.4,"Petersburg, ND",48.0158,-98.0018,"ND",["https://wxr.gwes-cdn.net/WXM38"]],["KZZ69",162.45,"Beatrice, NE",40.2681,-96.7475,"NE",["https://radio.weatherusa.net/NWR/KZZ69.mp3"]],["WXL74",162.4,"Grand Island, NE",40.9264,-98.342,"NE",["https://wxradio.org/NE-GrandIsland-WXL74"]],["WXM20",162.475,"Lincoln, NE",40.8136,-96.7026,"NE",["https://wxradio.org/NE-Lincoln-WXM20-alt2","https://wxradio.org/NE-Lincoln-WXM20-alt1"]],["KIH61",162.4,"Omaha, NE",41.2565,-95.9345,"NE",["https://radio.weatherusa.net/NWR/KIH61.mp3","https://wxr.gwes-cdn.net/KIH61","https://wxradio.org/NE-Omaha-KIH61-A"]],["WXL67",162.475,"Scottsbluff, NE",41.8666,-103.6672,"NE",["https://wxradio.org/NE-Scottsbluff-WXL67"]],["WWG20",162.45,"Fernley, NV",39.608,-119.2518,"NV",["https://radio.weatherusa.net/NWR/WWG20.mp3"]],["WXK58",162.55,"Reno, NV",39.5296,-119.8138,"NV",["https://radio.weatherusa.net/NWR/WXK58.mp3"]],["WXJ37",162.475,"Farmington, NM",36.7281,-108.2187,"NM",["https://wxr.gwes-cdn.net/WXJ37","https://radio.weatherusa.net/NWR/WXJ37.mp3"]],["KWO35",162.55,"New York City, NY",40.7128,-74.006,"NY",["https://wxr.gwes-cdn.net/KWO35","https://wxradio.org/NY-NewYorkCity-KWO35","https://www.saucci.net:8443/audio3.ogg"]],["WXL34",162.55,"Albany, NY",42.6526,-73.7562,"NY",["https://wxradio.org/NY-Albany-WXL34"]],["KEB98",162.55,"Buffalo, NY",42.8864,-78.8784,"NY",["https://radio.weatherusa.net/NWR/KEB98.mp3"]],["WZ2536",162.475,"Lyons, NY",43.0642,-76.9905,"NY",["https://wxradio.org/NY-Lyons-WZ2536"]],["WXM45",162.425,"Middleville, NY",43.1198,-74.979,"NY",["https://wxradio.org/NY-Middleville-WXM45-alt1"]],["KHA53",162.4,"Rochester, NY",43.1566,-77.6088,"NY",["https://wxradio.org/NY-Rochester-KHA53"]],["WXL31",162.55,"Syracuse, NY",43.0481,-76.1474,"NY",["https://wxradio.org/NY-Syracuse-WXL31","https://wxradio.org/NY-Syracuse-WXL31-alt1"]],["KDO94",162.4,"Akron, OH",41.0814,-81.519,"OH",["https://radio.weatherusa.net/NWR/KDO94.mp3"]],["KIG86",162.55,"Columbus, OH",39.9612,-82.9988,"OH",["https://wxradio.org/OH-Columbus-KIG86","https://radio.weatherusa.net/NWR/KIG86.mp3"]],["WNG698",162.5,"Grafton, OH",41.1726,-82.0546,"OH",["https://wxradio.org/OH-Grafton-WNG698"]],["WWG57",162.45,"Mansfield, OH",40.7589,-82.5155,"OH",["https://wxradio.org/OH-Mansfield-WWG57"]],["WXJ93",162.4,"Lima, OH",40.7428,-84.1052,"OH",["https://wxradio.org/OH-Lima-WXJ93","https://wxradio.org/OH-Lima-WXJ93-alt1","https://wxradio.org/OH-Lima-WXJ93-alt2"]],["WXL51",162.5,"Toledo, OH",41.6528,-83.5379,"OH",["https://wxr.gwes-cdn.net/WXL51","https://wxradio.org/OH-Toledo-WXL51"]],["WXK85",162.4,"Oklahoma City, OK",35.4676,-97.5164,"OK",["https://wxradio.org/OK-OklahomaCity-WXK85","https://radio.weatherusa.net/NWR/WXK85.mp3"]],["WXK86",162.55,"Lawton, OK",34.6036,-98.3959,"OK",["https://wxradio.org/OK-Lawton-WXK86","https://radio.weatherusa.net/NWR/WXK86.mp3"]],["KIH27",162.55,"Tulsa, OK",36.154,-95.9928,"OK",["https://wxradio.org/OK-Tulsa-KIH27"]],["KIH28",162.475,"Philadelphia, PA",39.9526,-75.1652,"PA",["https://radio.weatherusa.net/NWR/KIH28_3.mp3","https://wxr.gwes-cdn.net/KIH28","https://wxradio.org/PA-Philadelphia-KIH28"]],["WXL39",162.4,"Allentown, PA",40.6084,-75.4902,"PA",["https://wxr.gwes-cdn.net/WXL39"]],["WXL40",162.55,"Harrisburg, PA",40.2732,-76.8867,"PA",["https://wxradio.org/PA-Harrisburg-WXL40"]],["WNG704",162.425,"Hibernia Park, PA",40.0521,-75.8166,"PA",["https://wxradio.org/PA-HiberniaPark-WNG704"]],["WXL43",162.55,"Wilkes-Barre, PA",41.2459,-75.8813,"PA",["https://wxradio.org/PA-WilkesBarre-WXL43"]],["WXJ21",162.55,"Greer, SC",34.9388,-82.2271,"SC",["https://wxr.gwes-cdn.net/WXJ21","https://wxradio.org/SC-Greenville-WXJ21"]],["KEC85",162.4,"Jasper County, SC",32.4316,-81.0112,"SC",["https://wxr.gwes-cdn.net/KEC85","https://wxradio.org/SC-Savannah-KEC85"]],["WXK49",162.475,"Memphis, TN",35.1495,-90.049,"TN",["https://usa10.fastcast4u.com:3210/1"]],["WXK63",162.475,"Shelbyville, TN",35.4834,-86.4603,"TN",["https://radio.weatherusa.net/NWR/WXK63.mp3"]],["KIG79",162.55,"White House, TN",36.4706,-86.6514,"TN",["https://wxr.gwes-cdn.net/KIG79"]],["WXK38",162.55,"Amarillo, TX",35.222,-101.8313,"TX",["https://radio.weatherusa.net/NWR/WXK38_2.mp3"]],["WXK27",162.4,"Austin, TX",30.2672,-97.7431,"TX",["https://wxradio.org/TX-Austin-WXK27"]],["WXK30",162.55,"College Station, TX",30.628,-96.3344,"TX",["https://wxr.gwes-cdn.net/WXK30"]],["KXI87",162.525,"Corsicana, TX",32.0954,-96.4689,"TX",["https://wxr.gwes-cdn.net/KXI87","https://radio.weatherusa.net/NWR/KXI87.mp3"]],["KEC56",162.4,"Dallas, TX",32.7767,-96.797,"TX",["https://wxradio.org/TX-Dallas-KEC56"]],["KEC55",162.55,"Fort Worth, TX",32.7555,-97.3308,"TX",["https://wxr.gwes-cdn.net/KEC55","https://radio.weatherusa.net/NWR/KEC55_2.mp3"]],["KHB40",162.55,"Galveston, TX",29.3013,-94.7977,"TX",["https://wxradio.org/TX-Galveston-KHB40"]],["KGG68",162.4,"Houston/Tomball, TX",30.0972,-95.6161,"TX",["https://wxr.gwes-cdn.net/KGG68","https://radio.weatherusa.net/NWR/KGG68.mp3"]],["WXK23",162.55,"Lufkin, TX",31.3382,-94.7291,"TX",["https://radio.weatherusa.net/NWR/WXK23.mp3"]],["KWN34",162.45,"Palestine, TX",31.7621,-95.6308,"TX",["https://radio.weatherusa.net/NWR/KWN34.mp3"]],["WXK36",162.475,"Tyler, TX",32.3513,-95.3011,"TX",["https://wxradio.org/TX-Tyler-WXK36","https://radio.weatherusa.net/NWR/WXK36_2.mp3","https://wxradio.org/TX-Tyler-WXK36-alt1","https://wxradio.org/TX-Tyler-WXK36-alt2"]],["WXK35",162.475,"Waco, TX",31.5493,-97.1467,"TX",["https://radio.weatherusa.net/NWR/EW6308.mp3"]],["KHB36",162.55,"Manassas, VA",38.7509,-77.4753,"VA",["https://wxr.gwes-cdn.net/KHB36","https://stream.mikev.com/khb36.mp3","https://wxradio.org/VA-Manassas-KHB36"]],["KHB37",162.55,"Virginia Beach, VA",36.8529,-75.978,"VA",["https://wxr.gwes-cdn.net/KHB37","https://wxradio.org/VA-Norfolk-KHB37","https://radio.weatherusa.net/NWR/KHB37_3.mp3"]],["KHB60",162.55,"Seattle, WA",47.6062,-122.3321,"WA",["https://wxradio.bobc.io/stream/KHB60","https://wxr.gwes-cdn.net/KHB60"]],["WWG24",162.425,"Puget Sound Marine, WA",47.6062,-122.3321,"WA",["https://wxradio.org/WA-PugetSoundMarine-WWG24","https://wxradio.bobc.io/stream/WWG24","https://wxr.gwes-cdn.net/WWG24"]],["WWF56",162.45,"Richland, WA",46.2856,-119.2845,"WA",["https://radio.weatherusa.net/NWR/WWF56_2.mp3"]],["WXM71",162.4,"Beckley, WV",37.7782,-81.1882,"WV",["https://wxradio.org/WV-Beckley-WXM71"]],["WXJ84",162.4,"Charleston, WV",38.3498,-81.6326,"WV",["https://wxr.gwes-cdn.net/WXJ84"]],["WXM74",162.4,"Sutton, WV",38.6646,-80.7098,"WV",["https://wxr.gwes-cdn.net/WXM74"]],["KZZ78",162.525,"Ashland, WI",46.5925,-90.8838,"WI",["https://wxradio.org/WI-Ashland-KZZ78"]],["KIG65",162.55,"Green Bay, WI",44.5133,-88.0133,"WI",["https://wxradio.org/WI-GreenBay-KIG65"]],["WXJ88",162.4,"Menomonie, WI",44.8755,-91.9193,"WI",["https://wxradio.org/WI-Menomonie-WXJ88","https://radio.weatherusa.net/NWR/WXJ88.mp3","https://wxradio.org/WI-Menomonie-WXJ88-alt1"]],["WNG553",162.4,"Wausaukee, WI",45.3808,-87.9651,"WI",["https://wxradio.org/WI-Wausaukee-WNG553"]],["KGG95",162.425,"Winona, WI",44.0461,-91.6393,"WI",["https://wxradio.org/MN-Winona-KGG95","https://radio.weatherusa.net/NWR/KGG95.mp3"]],["KZZ77",162.425,"Withee, WI",44.9572,-90.5932,"WI",["https://wxradio.org/WI-Withee-KZZ77"]],["XLF339",162.475,"Calgary, AB",51.0447,-114.0719,"AB",["https://wxradio.org/AB-Calgary-XLF339"]],["WXK78",162.475,"Cheyenne, WY",41.15,-104.8,"WY",["https://radio.weatherusa.net/NWR/WXK78.mp3"]],["WXL58",162.475,"Raleigh, NC",35.78,-78.64,"NC",["https://radio.weatherusa.net/NWR/WXL58.mp3"]],["XLM572",162.4,"Edmonton, AB",53.5461,-113.4938,"AB",["https://wxradio.org/AB-Edmonton-XLM572"]],["XMJ316",162.4,"Collingwood, ON",44.5001,-80.2169,"ON",["https://wxradio.org/ON-Collingwood-XMJ316"]],["XMJ225",162.4,"Toronto, ON",43.6532,-79.3832,"ON",["https://wxradio.org/ON-Toronto-XMJ225"]]];
 /* ---------- NOAA Weather Radio (135 US stations, volunteer streams) ---------- */
 function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1471,7 +1471,7 @@ function renderNationalAlerts(alerts) {
 }
 
 /* ---------- Storm Prediction Center: storm reports + convective outlook ---------- */
-let spcCache = { reports: null, outlook: null, outlook2: null, outlook3: null, mds: null, mpds: null, fetchedAt: 0 };
+let spcCache = { reports: null, reportsY: null, outlook: null, outlook2: null, outlook3: null, mds: null, mpds: null, day48: null, fire1: null, fire2: null, ero: null, twoAT: null, twoEP: null, storms: null, fetchedAt: 0 };
 
 function parseCsvLine(line) {
   const out = [];
@@ -1489,9 +1489,9 @@ function parseCsvLine(line) {
   return out;
 }
 
-async function fetchSpcReports() {
+async function fetchSpcReports(csvUrl) {
   try {
-    const r = await fetch("https://www.spc.noaa.gov/climo/reports/today.csv");
+    const r = await fetch(csvUrl || "https://www.spc.noaa.gov/climo/reports/today.csv");
     if (!r.ok) throw new Error("bad status");
     const text = await r.text();
     const out = { tornado: [], wind: [], hail: [] };
@@ -1552,6 +1552,153 @@ async function fetchSpcOutlook(day) {
     const sm = text.match(/\.\.\.SUMMARY\.\.\.([\s\S]*?)(?:\n\s*\.\.\.|$)/i);
     if (sm) summary = sm[1].replace(/\s+/g, " ").trim().slice(0, 800);
     return { risks: risks, summary: summary };
+  } catch (e) { return null; }
+}
+
+/* ---------- Extra outlooks: Day 4-8, fire weather, ERO, tropical ----------
+   All free government text products, parsed the same way as the SPC
+   outlooks above. Times from SPC are UTC; NHC/WPC issue in local zones. */
+function extractPreText(htmlText) {
+  try {
+    const m = String(htmlText).match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+    if (!m) return "";
+    return m[1].replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  } catch (e) { return ""; }
+}
+function collapseWs(s) { return String(s === undefined || s === null ? "" : s).replace(/\s+/g, " ").trim(); }
+
+/* Day 4-8 convective outlook: the discussion text is embedded in the
+   product index page. */
+async function fetchDay48() {
+  try {
+    const r = await fetch("https://www.spc.noaa.gov/products/exper/day4-8/");
+    if (!r.ok) throw new Error("bad status");
+    const pre = extractPreText(await r.text());
+    if (!pre || !/Day 4-8 Convective Outlook/i.test(pre)) throw new Error("no product");
+    const issued = (pre.match(/NWS Storm Prediction Center Norman OK\s*\n\s*([^\n]+)/i) || [null, ""])[1];
+    const valid = (pre.match(/Valid\s+([^\n]+)/i) || [null, ""])[1];
+    let disc = "";
+    const dm = pre.match(/\.\.\.DISCUSSION\.\.\.\s*([\s\S]*?)(?:\$\$|\.\.[A-Za-z]+\.\.|CLICK TO GET|$)/i);
+    if (dm) disc = collapseWs(dm[1]).slice(0, 2600);
+    return { issued: collapseWs(issued), valid: collapseWs(valid), discussion: disc };
+  } catch (e) { return null; }
+}
+
+/* SPC fire weather outlooks, days 1 and 2: full product text is embedded
+   in the fwdy1/fwdy2 pages. */
+async function fetchFireWx(day) {
+  day = day === 2 ? 2 : 1;
+  try {
+    const r = await fetch("https://www.spc.noaa.gov/products/fire_wx/fwdy" + day + ".html");
+    if (!r.ok) throw new Error("bad status");
+    const pre = extractPreText(await r.text());
+    if (!pre || !/Fire Weather Outlook/i.test(pre)) throw new Error("no product");
+    const issued = (pre.match(/NWS Storm Prediction Center Norman OK\s*\n\s*([^\n]+)/i) || [null, ""])[1];
+    const valid = (pre.match(/Valid\s+([^\n]+)/i) || [null, ""])[1];
+    const areas = [];
+    const re = /\.\.\.((?:EXTREMELY\s+)?CRITICAL|ELEVATED)\s+FIRE\s+WEATHER\s+AREAS?\s+FOR\s+(.*?)\.\.\./gis;
+    let m;
+    while ((m = re.exec(pre)) !== null) areas.push({ level: collapseWs(m[1]), area: collapseWs(m[2]).replace(/\.*$/, "") });
+    const noneMsg = /\.\.\.NO\s+(?:CRITICAL|ELEVATED)\s+AREAS?\.\.\./i.test(pre) && !areas.length;
+    let synopsis = "";
+    const sm = pre.match(/\.\.\.Synopsis\.\.\.\s*([\s\S]*?)(?:\$\$|$)/i);
+    if (sm) synopsis = collapseWs(sm[1]).slice(0, 1000);
+    return { day: day, issued: collapseWs(issued), valid: collapseWs(valid), areas: areas, noneMsg: noneMsg, synopsis: synopsis };
+  } catch (e) { return null; }
+}
+
+/* WPC excessive rainfall outlook: forecaster discussion, usually days 1-3. */
+const ERO_RISK_ORDER = { MARGINAL: 0, SLIGHT: 1, MODERATE: 2, HIGH: 3 };
+async function fetchEro() {
+  try {
+    const r = await fetch("https://www.wpc.ncep.noaa.gov/discussions/hpcdiscussions.php?disc=qpferd");
+    if (!r.ok) throw new Error("bad status");
+    const pre = extractPreText(await r.text());
+    if (!pre || !/Excessive Rainfall Discussion/i.test(pre)) throw new Error("no product");
+    const issued = (pre.match(/NWS Weather Prediction Center College Park MD\s*\n\s*([^\n]+)/i) || [null, ""])[1];
+    const days = [];
+    const chunks = pre.split(/(?=^\s*Day\s+[123]\s*$)/gim).filter(c => /^\s*Day\s+[123]/i.test(c));
+    chunks.forEach(ch => {
+      const dm = ch.match(/^\s*Day\s+([123])/im);
+      const valid = (ch.match(/Valid\s+([^\n]+)/i) || [null, ""])[1];
+      const risks = [];
+      const re = /\.\.\.THERE IS AN? (\w+) RISK OF EXCESSIVE RAINFALL (.*?)\.\.\./gis;
+      let m;
+      while ((m = re.exec(ch)) !== null) risks.push({ level: m[1].toUpperCase(), area: collapseWs(m[2]) });
+      risks.sort((a, b) => (ERO_RISK_ORDER[b.level] || 0) - (ERO_RISK_ORDER[a.level] || 0));
+      let disc = ch.replace(/^\s*Day\s+[123]\s*$/gim, " ").replace(/Valid\s+[^\n]+/i, " ");
+      disc = disc.replace(/\.\.\.THERE IS AN? \w+ RISK OF EXCESSIVE RAINFALL .*?\.\.\./gis, " ");
+      disc = collapseWs(disc).replace(/\s*\$\$.*$/, "").slice(0, 2400);
+      days.push({ day: parseInt(dm[1], 10), valid: collapseWs(valid), risks: risks, discussion: disc });
+    });
+    return { issued: collapseWs(issued), days: days };
+  } catch (e) { return null; }
+}
+function eroLevelName(l) { return l.charAt(0) + l.slice(1).toLowerCase(); }
+function topEroRisk() {
+  try {
+    const days = spcCache.ero && spcCache.ero.days;
+    if (!days || !days.length || !days[0].risks.length) return "";
+    return eroLevelName(days[0].risks[0].level);
+  } catch (e) { return ""; }
+}
+
+/* NHC text products (tropical outlooks and advisories share one format). */
+async function fetchNhcText(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error("bad status");
+  const txt = (await r.text()).replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&");
+  const start = txt.indexOf("NWS National Hurricane Center");
+  if (start < 0) throw new Error("no product");
+  let body = txt.slice(start);
+  const end = body.indexOf("$$");
+  body = (end > 0 ? body.slice(0, end) : body).replace(/[ \t\u00a0]+/g, " ");
+  const issued = (body.match(/NWS National Hurricane Center Miami FL\s*([^\n]+)/) || [null, ""])[1];
+  return { issued: collapseWs(issued), body: body };
+}
+function parseTwoDisturbances(body) {
+  const out = [];
+  let cur = null;
+  const pushCur = () => { if (cur && cur.title) out.push(cur); cur = null; };
+  body.split("\n").forEach(raw => {
+    const line = raw.trim();
+    if (!line) return;
+    const hm = line.match(/^(\d+)\.\s+(.*)$/);
+    if (hm) { pushCur(); cur = { num: hm[1], title: hm[2].replace(/:\s*$/, ""), text: "", ch48: "", ch7: "" }; return; }
+    if (!cur) return;
+    let cm = line.match(/Formation chance through 48 hours\.{2,}\s*([a-z]+)\.{2,}\s*(.*?percent)/i);
+    if (cm) { cur.ch48 = cm[1].toLowerCase() + ", " + cm[2].trim(); return; }
+    cm = line.match(/Formation chance through 7 days\.{2,}\s*([a-z]+)\.{2,}\s*(.*?percent)/i);
+    if (cm) { cur.ch7 = cm[1].toLowerCase() + ", " + cm[2].trim(); return; }
+    if (!/Forecaster/i.test(line)) cur.text += (cur.text ? " " : "") + line;
+  });
+  pushCur();
+  return out;
+}
+async function fetchTwo(basin) {
+  const code = basin === "EP" ? "MIATWOEP" : "MIATWOAT";
+  const label = basin === "EP" ? "Eastern Pacific" : "Atlantic";
+  try {
+    const t = await fetchNhcText("https://www.nhc.noaa.gov/text/" + code + ".shtml");
+    const scopeM = t.body.match(/For the ([^\n:]+):/);
+    const noneM = /formation is not expected/i.test(t.body);
+    return { basin: label, issued: t.issued, scope: scopeM ? collapseWs(scopeM[1]) : "", noneExpected: noneM, dist: noneM ? [] : parseTwoDisturbances(t.body) };
+  } catch (e) { return null; }
+}
+
+const TC_CLASS = { HU: "Hurricane", TS: "Tropical Storm", TD: "Tropical Depression", TY: "Typhoon", ST: "Subtropical Storm", SD: "Subtropical Depression", SS: "Subtropical Storm", EX: "Extratropical Cyclone", PT: "Post-Tropical Cyclone", LO: "Low Pressure Area", DB: "Disturbance", WV: "Tropical Wave" };
+async function fetchActiveStorms() {
+  try {
+    const r = await fetch("https://www.nhc.noaa.gov/CurrentStorms.json");
+    if (!r.ok) throw new Error("bad status");
+    const d = await r.json();
+    return (d.activeStorms || []).map(s => ({
+      name: s.name, cls: TC_CLASS[s.classification] || s.classification || "Cyclone",
+      wind: s.intensity, pressure: s.pressure, lat: s.latitude, lon: s.longitude,
+      moveDir: s.movementDir, moveSpd: s.movementSpeed,
+      advisory: (s.publicAdvisory && s.publicAdvisory.url) || "",
+      updated: s.lastUpdate || ""
+    }));
   } catch (e) { return null; }
 }
 
@@ -1689,8 +1836,15 @@ async function fetchWpcMpd() {
 
 async function ensureSpcData() {
   if (spcCache.fetchedAt && Date.now() - spcCache.fetchedAt < 15 * 60000) return spcCache;
-  const results = await Promise.all([fetchSpcReports(), fetchSpcOutlook(1), fetchSpcOutlook(2), fetchSpcOutlook(3), fetchSpcMd(), fetchWpcMpd()]);
-  spcCache = { reports: results[0], outlook: results[1], outlook2: results[2], outlook3: results[3], mds: results[4], mpds: results[5], fetchedAt: Date.now() };
+  const results = await Promise.all([
+    fetchSpcReports(),
+    fetchSpcReports("https://www.spc.noaa.gov/climo/reports/yesterday.csv"),
+    fetchSpcOutlook(1), fetchSpcOutlook(2), fetchSpcOutlook(3),
+    fetchSpcMd(), fetchWpcMpd(),
+    fetchDay48(), fetchFireWx(1), fetchFireWx(2), fetchEro(),
+    fetchTwo("AT"), fetchTwo("EP"), fetchActiveStorms()
+  ]);
+  spcCache = { reports: results[0], reportsY: results[1], outlook: results[2], outlook2: results[3], outlook3: results[4], mds: results[5], mpds: results[6], day48: results[7], fire1: results[8], fire2: results[9], ero: results[10], twoAT: results[11], twoEP: results[12], storms: results[13], fetchedAt: Date.now() };
   return spcCache;
 }
 
@@ -1725,8 +1879,11 @@ function fmtReportMag(kind, mag) {
   return mag;
 }
 
-async function renderSpcReports() {
-  spcLoadingView("Today's storm reports");
+async function renderSpcReports(which) {
+  which = which === "yesterday" ? "yesterday" : "today";
+  const whichName = which === "yesterday" ? "Yesterday's" : "Today's";
+  const dayWord = which === "yesterday" ? "yesterday" : "today";
+  spcLoadingView(whichName + " storm reports");
   const data = await ensureSpcData();
   const box = el("national-list");
   box.innerHTML = "";
@@ -1734,22 +1891,36 @@ async function renderSpcReports() {
   const heading = document.createElement("h3");
   heading.setAttribute("tabindex", "-1");
   box.appendChild(heading);
-  if (!data.reports) {
-    heading.textContent = "Today's storm reports";
+  const rep = which === "yesterday" ? data.reportsY : data.reports;
+  if (!rep) {
+    heading.textContent = whichName + " storm reports";
     const e = document.createElement("p");
     e.textContent = "Could not load storm reports. Check your connection and try again.";
     box.appendChild(e);
     heading.focus();
     return;
   }
-  const rep = data.reports;
   const total = rep.tornado.length + rep.wind.length + rep.hail.length;
-  heading.textContent = "Today's storm reports (" + total + ")";
+  heading.textContent = whichName + " storm reports (" + total + ")";
   box.appendChild(spcCheckedLine());
+  // Today / yesterday toggle
+  const dayTog = document.createElement("div");
+  dayTog.className = "seg";
+  dayTog.setAttribute("role", "group");
+  dayTog.setAttribute("aria-label", "Report day");
+  [["today", "Today"], ["yesterday", "Yesterday"]].forEach(pair => {
+    const b = document.createElement("button");
+    b.textContent = pair[1];
+    b.setAttribute("aria-pressed", pair[0] === which ? "true" : "false");
+    b.setAttribute("aria-label", "Show " + pair[1].toLowerCase() + "'s storm reports");
+    b.addEventListener("click", () => renderSpcReports(pair[0]));
+    dayTog.appendChild(b);
+  });
+  box.appendChild(dayTog);
   const sum = document.createElement("p");
   sum.textContent = total
-    ? rep.tornado.length + " tornado, " + rep.wind.length + " wind, " + rep.hail.length + " hail reports so far today."
-    : "No storm reports today — quiet out there.";
+    ? rep.tornado.length + " tornado, " + rep.wind.length + " wind, " + rep.hail.length + " hail reports " + (which === "yesterday" ? "yesterday." : "so far today.")
+    : "No storm reports " + dayWord + " — quiet out there.";
   box.appendChild(sum);
   // Nearest storm report to the user's location
   try {
@@ -1777,8 +1948,8 @@ async function renderSpcReports() {
     }
   } catch (e) {}
   speak(total
-    ? "Storm reports today: " + rep.tornado.length + " tornado, " + rep.wind.length + " wind, " + rep.hail.length + " hail."
-    : "No storm reports today.");
+    ? "Storm reports " + dayWord + ": " + rep.tornado.length + " tornado, " + rep.wind.length + " wind, " + rep.hail.length + " hail."
+    : "No storm reports " + dayWord + ".");
   // Filter chips: All / Tornado / Wind / Hail
   const listsBox = document.createElement("div");
   const chipRow = document.createElement("div");
@@ -1926,6 +2097,384 @@ async function renderSpcOutlook(day) {
     const sp = document.createElement("p");
     sp.textContent = ol.summary;
     box.appendChild(sp);
+  }
+  heading.focus();
+}
+
+
+/* ---------- Extra outlook views ---------- */
+async function renderDay48() {
+  spcLoadingView("Days 4\u20138 severe weather outlook");
+  const data = await ensureSpcData();
+  const box = el("national-list");
+  box.innerHTML = "";
+  box.appendChild(spcBackButton());
+  const heading = document.createElement("h3");
+  heading.setAttribute("tabindex", "-1");
+  box.appendChild(heading);
+  const d48 = data.day48;
+  if (!d48) {
+    heading.textContent = "Days 4\u20138 severe weather outlook";
+    const e = document.createElement("p");
+    e.textContent = "Could not load the outlook. Check your connection and try again.";
+    box.appendChild(e);
+    heading.focus();
+    return;
+  }
+  heading.textContent = "Days 4\u20138 severe weather outlook";
+  box.appendChild(spcCheckedLine());
+  const meta = document.createElement("p");
+  meta.className = "muted";
+  const bits = [];
+  if (d48.issued) bits.push("Issued " + d48.issued);
+  if (d48.valid) bits.push("Valid " + d48.valid);
+  meta.textContent = bits.join(". ") + ".";
+  box.appendChild(meta);
+  if (d48.discussion) {
+    const sp = document.createElement("p");
+    sp.textContent = d48.discussion;
+    box.appendChild(sp);
+    speak("Days 4 to 8 severe weather outlook. " + (d48.issued ? "Issued " + d48.issued + ". " : "") + d48.discussion);
+  } else {
+    const p = document.createElement("p");
+    p.textContent = "No discussion text in the current outlook.";
+    box.appendChild(p);
+    speak(p.textContent);
+  }
+  heading.focus();
+}
+
+async function renderFireWx(day) {
+  day = day === 2 ? 2 : 1;
+  const dayName = day === 2 ? "tomorrow" : "today";
+  spcLoadingView("Fire weather outlook");
+  const data = await ensureSpcData();
+  const box = el("national-list");
+  box.innerHTML = "";
+  box.appendChild(spcBackButton());
+  const heading = document.createElement("h3");
+  heading.setAttribute("tabindex", "-1");
+  box.appendChild(heading);
+  heading.textContent = "Fire weather outlook";
+  box.appendChild(spcCheckedLine());
+  const tog = document.createElement("div");
+  tog.className = "seg";
+  tog.setAttribute("role", "group");
+  tog.setAttribute("aria-label", "Outlook day");
+  [[1, "Today"], [2, "Tomorrow"]].forEach(pair => {
+    const b = document.createElement("button");
+    b.textContent = pair[1];
+    b.setAttribute("aria-pressed", pair[0] === day ? "true" : "false");
+    b.setAttribute("aria-label", "Show " + pair[1].toLowerCase() + "'s fire weather outlook");
+    b.addEventListener("click", () => renderFireWx(pair[0]));
+    tog.appendChild(b);
+  });
+  box.appendChild(tog);
+  const fw = day === 2 ? data.fire2 : data.fire1;
+  if (!fw) {
+    const e = document.createElement("p");
+    e.textContent = "Could not load the fire weather outlook. Check your connection and try again.";
+    box.appendChild(e);
+    speak(e.textContent);
+    heading.focus();
+    return;
+  }
+  if (fw.issued || fw.valid) {
+    const meta = document.createElement("p");
+    meta.className = "muted";
+    const bits = [];
+    if (fw.issued) bits.push("Issued " + fw.issued);
+    if (fw.valid) bits.push("Valid " + fw.valid);
+    meta.textContent = bits.join(". ") + ".";
+    box.appendChild(meta);
+  }
+  let said;
+  if (fw.areas.length) {
+    const intro = document.createElement("p");
+    intro.textContent = "Fire weather risk areas " + dayName + ":";
+    box.appendChild(intro);
+    fw.areas.forEach(a => {
+      const row = document.createElement("p");
+      const b = document.createElement("strong");
+      b.textContent = a.level.charAt(0) + a.level.slice(1).toLowerCase() + " risk";
+      row.appendChild(b);
+      row.appendChild(document.createTextNode(" — " + a.area + "."));
+      box.appendChild(row);
+    });
+    said = "Fire weather outlook for " + dayName + ": " + fw.areas.map(a => a.level.toLowerCase() + " fire weather risk for " + a.area).join(". ") + ".";
+  } else {
+    const p = document.createElement("p");
+    p.textContent = fw.noneMsg ? "No critical or elevated fire weather areas " + dayName + "." : "No fire weather risk areas " + dayName + ".";
+    box.appendChild(p);
+    said = p.textContent;
+  }
+  if (fw.synopsis) {
+    const sh = document.createElement("h4");
+    sh.textContent = "Forecaster synopsis";
+    box.appendChild(sh);
+    const sp = document.createElement("p");
+    sp.textContent = fw.synopsis;
+    box.appendChild(sp);
+  }
+  speak(said);
+  heading.focus();
+}
+
+async function renderEro(day) {
+  spcLoadingView("Excessive rainfall outlook");
+  const data = await ensureSpcData();
+  const box = el("national-list");
+  box.innerHTML = "";
+  box.appendChild(spcBackButton());
+  const heading = document.createElement("h3");
+  heading.setAttribute("tabindex", "-1");
+  box.appendChild(heading);
+  heading.textContent = "Excessive rainfall outlook";
+  const ero = data.ero;
+  if (!ero || !ero.days.length) {
+    const e = document.createElement("p");
+    e.textContent = "Could not load the excessive rainfall outlook. Check your connection and try again.";
+    box.appendChild(e);
+    speak(e.textContent);
+    heading.focus();
+    return;
+  }
+  day = ero.days.some(d => d.day === day) ? day : ero.days[0].day;
+  box.appendChild(spcCheckedLine());
+  if (ero.days.length > 1) {
+    const tog = document.createElement("div");
+    tog.className = "seg";
+    tog.setAttribute("role", "group");
+    tog.setAttribute("aria-label", "Outlook day");
+    ero.days.forEach(d => {
+      const label = d.day === 1 ? "Day 1" : (d.day === 2 ? "Day 2" : "Day 3");
+      const b = document.createElement("button");
+      b.textContent = label;
+      b.setAttribute("aria-pressed", d.day === day ? "true" : "false");
+      b.setAttribute("aria-label", "Show day " + d.day + " excessive rainfall outlook");
+      b.addEventListener("click", () => renderEro(d.day));
+      tog.appendChild(b);
+    });
+    box.appendChild(tog);
+  }
+  const d = ero.days.filter(x => x.day === day)[0];
+  const dayName = day === 1 ? "today into tomorrow" : (day === 2 ? "tomorrow into the next day" : "day 3");
+  if (ero.issued || d.valid) {
+    const meta = document.createElement("p");
+    meta.className = "muted";
+    const bits = [];
+    if (ero.issued) bits.push("Issued " + ero.issued);
+    if (d.valid) bits.push("Valid " + d.valid);
+    meta.textContent = bits.join(". ") + ".";
+    box.appendChild(meta);
+  }
+  let said;
+  if (d.risks.length) {
+    const intro = document.createElement("p");
+    intro.textContent = "Excessive rainfall risk " + dayName + ":";
+    box.appendChild(intro);
+    d.risks.forEach(r => {
+      const row = document.createElement("p");
+      const b = document.createElement("strong");
+      b.textContent = eroLevelName(r.level) + " risk";
+      row.appendChild(b);
+      row.appendChild(document.createTextNode(" — " + r.area + "."));
+      box.appendChild(row);
+    });
+    said = "Excessive rainfall outlook for day " + day + ": " + d.risks.map(r => eroLevelName(r.level) + " risk of excessive rainfall " + r.area).join(". ") + ".";
+  } else {
+    const p = document.createElement("p");
+    p.textContent = "No excessive rainfall risk areas on day " + day + ".";
+    box.appendChild(p);
+    said = p.textContent;
+  }
+  if (d.discussion) {
+    const sh = document.createElement("h4");
+    sh.textContent = "Forecaster discussion";
+    box.appendChild(sh);
+    const sp = document.createElement("p");
+    sp.textContent = d.discussion;
+    box.appendChild(sp);
+  }
+  speak(said);
+  heading.focus();
+}
+
+async function renderTwo(basin) {
+  basin = basin === "EP" ? "EP" : "AT";
+  const basinName = basin === "EP" ? "Eastern Pacific" : "Atlantic";
+  spcLoadingView("Tropical weather outlook");
+  const data = await ensureSpcData();
+  const box = el("national-list");
+  box.innerHTML = "";
+  box.appendChild(spcBackButton());
+  const heading = document.createElement("h3");
+  heading.setAttribute("tabindex", "-1");
+  box.appendChild(heading);
+  heading.textContent = "Tropical weather outlook";
+  box.appendChild(spcCheckedLine());
+  const tog = document.createElement("div");
+  tog.className = "seg";
+  tog.setAttribute("role", "group");
+  tog.setAttribute("aria-label", "Ocean basin");
+  [["AT", "Atlantic"], ["EP", "E. Pacific"]].forEach(pair => {
+    const b = document.createElement("button");
+    b.textContent = pair[1];
+    b.setAttribute("aria-pressed", pair[0] === basin ? "true" : "false");
+    b.setAttribute("aria-label", "Show " + pair[1] + " tropical weather outlook");
+    b.addEventListener("click", () => renderTwo(pair[0]));
+    tog.appendChild(b);
+  });
+  box.appendChild(tog);
+  const two = basin === "EP" ? data.twoEP : data.twoAT;
+  if (!two) {
+    const e = document.createElement("p");
+    e.textContent = "Could not load the tropical outlook. Check your connection and try again.";
+    box.appendChild(e);
+    speak(e.textContent);
+    heading.focus();
+    return;
+  }
+  if (two.issued) {
+    const meta = document.createElement("p");
+    meta.className = "muted";
+    meta.textContent = "Issued " + two.issued + ". Covers the next 7 days.";
+    box.appendChild(meta);
+  }
+  let said;
+  if (two.noneExpected || !two.dist.length) {
+    const p = document.createElement("p");
+    p.textContent = two.noneExpected
+      ? "Tropical cyclone formation is not expected in the " + basinName + " over the next 7 days."
+      : "No disturbances being tracked in the " + basinName + " right now.";
+    box.appendChild(p);
+    said = p.textContent;
+  } else {
+    const intro = document.createElement("p");
+    intro.textContent = two.dist.length + (two.dist.length === 1 ? " disturbance" : " disturbances") + " being watched in the " + basinName + ":";
+    box.appendChild(intro);
+    const sayParts = [];
+    two.dist.forEach(d => {
+      const sh = document.createElement("h4");
+      sh.textContent = d.num + ". " + d.title;
+      box.appendChild(sh);
+      if (d.text) {
+        const tp = document.createElement("p");
+        tp.textContent = d.text;
+        box.appendChild(tp);
+      }
+      const cp = document.createElement("p");
+      const bits = [];
+      if (d.ch48) bits.push("48 hours: " + d.ch48);
+      if (d.ch7) bits.push("7 days: " + d.ch7);
+      cp.textContent = bits.length ? "Formation chance — " + bits.join("; ") + "." : "Formation chance not stated.";
+      box.appendChild(cp);
+      sayParts.push(d.title + ". " + (bits.length ? "Formation chance: " + bits.join(", ") : "formation chance not stated"));
+    });
+    said = "Tropical weather outlook for the " + basinName + ": " + sayParts.join(". ") + ".";
+  }
+  speak(said);
+  heading.focus();
+}
+
+function tcCompass(deg) {
+  if (deg === undefined || deg === null || isNaN(deg)) return "";
+  const dirs = ["north", "north-northeast", "northeast", "east-northeast", "east", "east-southeast", "southeast", "south-southeast", "south", "south-southwest", "southwest", "west-southwest", "west", "west-northwest", "northwest", "north-northwest"];
+  return dirs[Math.round(deg / 22.5) % 16];
+}
+async function renderActiveStorms() {
+  spcLoadingView("Active tropical cyclones");
+  const data = await ensureSpcData();
+  const box = el("national-list");
+  box.innerHTML = "";
+  box.appendChild(spcBackButton());
+  const heading = document.createElement("h3");
+  heading.setAttribute("tabindex", "-1");
+  box.appendChild(heading);
+  heading.textContent = "Active tropical cyclones";
+  box.appendChild(spcCheckedLine());
+  const storms = data.storms;
+  if (!storms) {
+    const e = document.createElement("p");
+    e.textContent = "Could not load active storms. Check your connection and try again.";
+    box.appendChild(e);
+    speak(e.textContent);
+    heading.focus();
+    return;
+  }
+  if (!storms.length) {
+    const p = document.createElement("p");
+    p.textContent = "No active tropical cyclones right now.";
+    box.appendChild(p);
+    speak(p.textContent);
+    heading.focus();
+    return;
+  }
+  const intro = document.createElement("p");
+  intro.textContent = storms.length + (storms.length === 1 ? " active storm:" : " active storms:");
+  box.appendChild(intro);
+  const sayParts = [];
+  storms.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "hl-card";
+    const title = document.createElement("p");
+    const strong = document.createElement("strong");
+    strong.textContent = s.cls + " " + s.name;
+    title.appendChild(strong);
+    card.appendChild(title);
+    const bits = [];
+    if (s.wind) bits.push("Winds " + s.wind + " mph");
+    if (s.pressure) bits.push("Pressure " + s.pressure + " millibars");
+    if (s.lat && s.lon) bits.push("Near " + s.lat + ", " + s.lon);
+    const mv = tcCompass(s.moveDir);
+    if (mv) bits.push("Moving " + mv + (s.moveSpd ? " at " + s.moveSpd + " mph" : ""));
+    const dp = document.createElement("p");
+    dp.textContent = bits.join(". ") + ".";
+    card.appendChild(dp);
+    if (s.advisory) {
+      const ab = document.createElement("button");
+      ab.type = "button";
+      ab.className = "btn-small";
+      ab.textContent = "Read latest advisory";
+      ab.setAttribute("aria-label", "Read the latest public advisory for " + s.cls + " " + s.name);
+      ab.addEventListener("click", () => { renderAdvisory(s.advisory, s.cls + " " + s.name); pushBackView("national", backToNationalMenu); });
+      card.appendChild(ab);
+    }
+    box.appendChild(card);
+    sayParts.push(s.cls + " " + s.name + ", " + bits.join(", "));
+  });
+  speak("Active tropical cyclones: " + sayParts.join(". ") + ".");
+  heading.focus();
+}
+async function renderAdvisory(url, title) {
+  spcLoadingView("Advisory");
+  const box = el("national-list");
+  box.innerHTML = "";
+  box.appendChild(spcBackButton());
+  const heading = document.createElement("h3");
+  heading.setAttribute("tabindex", "-1");
+  box.appendChild(heading);
+  heading.textContent = "Latest advisory: " + title;
+  try {
+    const t = await fetchNhcText(url);
+    if (t.issued) {
+      const meta = document.createElement("p");
+      meta.className = "muted";
+      meta.textContent = "Issued " + t.issued + ".";
+      box.appendChild(meta);
+    }
+    const cleaned = t.body.replace(/^NWS National Hurricane Center Miami FL\s*[^\n]*\n?/, "").trim();
+    cleaned.split(/\n\s*\n/).forEach(para => {
+      const p = document.createElement("p");
+      p.textContent = collapseWs(para);
+      if (p.textContent) box.appendChild(p);
+    });
+    speak("Latest advisory for " + title + ". " + (t.issued ? "Issued " + t.issued + ". " : "") + collapseWs(cleaned).slice(0, 1500));
+  } catch (e) {
+    const p = document.createElement("p");
+    p.textContent = "Could not load the advisory. Check your connection and try again.";
+    box.appendChild(p);
+    speak(p.textContent);
   }
   heading.focus();
 }
@@ -2754,7 +3303,7 @@ function renderNationalMenu(box) {
   mkGroup("Outlooks and reports");
   // Storm Prediction Center categories (loaded on demand)
   const repTotal = spcCache.reports ? (spcCache.reports.tornado.length + spcCache.reports.wind.length + spcCache.reports.hail.length) : null;
-  mkRow("Storm reports", repTotal === null ? "\u2026" : repTotal, "reports-row", "\u26C8\uFE0F", () => { renderSpcReports(); pushBackView("national", backToNationalMenu); }, "Today's tornado, wind and hail reports");
+  mkRow("Storm reports", repTotal === null ? "\u2026" : repTotal, "reports-row", "\u26C8\uFE0F", () => { renderSpcReports(); pushBackView("national", backToNationalMenu); }, "Tornado, wind and hail reports, today and yesterday");
   const topRisk = spcCache.outlook && spcCache.outlook.risks.length ? spcCache.outlook.risks[0].label : null;
   mkRow("Severe outlook", topRisk || "\u2026", "outlook-row", "\uD83D\uDDFA\uFE0F", () => { renderSpcOutlook(); pushBackView("national", backToNationalMenu); }, "Today, tomorrow, and day 3 severe outlooks");
   const mdList = spcCache.mds || null;
@@ -2779,6 +3328,18 @@ function renderNationalMenu(box) {
     }
   }
   mkRow("Rain/flood discussions", mpdActive === null ? "\u2026" : mpdActive, "mpd-row", "\uD83C\uDF27\uFE0F", () => { renderWpcMpd(); pushBackView("national", backToNationalMenu); }, mpdSub);
+  // Extra outlooks (loaded on demand with the rest of the SPC data)
+  mkRow("Days 4\u20138 outlook", spcCache.day48 ? "\u2713" : "\u2026", "day48-row", "\uD83D\uDCC5", () => { renderDay48(); pushBackView("national", backToNationalMenu); }, "Extended severe weather outlook, days 4 to 8");
+  const fireAreas = (spcCache.fire1 && spcCache.fire1.areas ? spcCache.fire1.areas.length : 0) + (spcCache.fire2 && spcCache.fire2.areas ? spcCache.fire2.areas.length : 0);
+  const fireLoaded = spcCache.fire1 !== null || spcCache.fire2 !== null;
+  mkRow("Fire weather", !fireLoaded ? "\u2026" : String(fireAreas), "fire-row", "\uD83D\uDD25", () => { renderFireWx(1); pushBackView("national", backToNationalMenu); }, "Fire weather outlook, days 1 and 2");
+  const eroRisk = topEroRisk();
+  mkRow("Excessive rainfall", spcCache.ero === null ? "\u2026" : (eroRisk || "None"), "ero-row", "\uD83C\uDF0A", () => { renderEro(1); pushBackView("national", backToNationalMenu); }, "Flood-rain risk, days 1 to 3");
+  const twoCount = (spcCache.twoAT && spcCache.twoAT.dist ? spcCache.twoAT.dist.length : 0) + (spcCache.twoEP && spcCache.twoEP.dist ? spcCache.twoEP.dist.length : 0);
+  const twoLoaded = spcCache.twoAT !== null || spcCache.twoEP !== null;
+  mkRow("Tropical outlook", !twoLoaded ? "\u2026" : String(twoCount), "two-row", "\uD83C\uDF00", () => { renderTwo("AT"); pushBackView("national", backToNationalMenu); }, "Hurricane formation outlook, Atlantic and E. Pacific");
+  const stormCount = spcCache.storms ? spcCache.storms.length : null;
+  mkRow("Active storms", stormCount === null ? "\u2026" : String(stormCount), "storms-row", "\uD83D\uDCE1", () => { renderActiveStorms(); pushBackView("national", backToNationalMenu); }, "Live tropical cyclones with advisories");
   mkGroup("Live");
   mkRow("Live radar", "NEXRAD", "radar-row", "\uD83D\uDCFB", () => { pushBackView("national", backToNationalMenu); openRadarModal(); }, "Live NEXRAD radar with cities and roads");
 }
